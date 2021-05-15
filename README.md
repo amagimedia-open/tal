@@ -1,2 +1,2 @@
 # tal
-generate Training material using static Annotations and Logs
+generate Training material using Annotations and Logs
