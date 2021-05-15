@@ -41,7 +41,7 @@ fi
 #| source enviroment variables |
 #+-----------------------------+
 
-source $DIRNAME/set-env-vars.sh
+source $DIRNAME/set_env_vars.sh
 
 #+-----------+
 #| functions |
