@@ -126,6 +126,7 @@ source $TAL_VENV_ACTIVATE_FILE_PATH
     if ((OPT_ALL || OPT_SIMPY))
     then
         pip install -U simpy
+        #pip install -U pytest
     fi
 
 set +u
