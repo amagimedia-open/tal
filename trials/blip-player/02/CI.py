@@ -1,3 +1,4 @@
+import sys
 from collections import OrderedDict
 
 class CIRep:
@@ -11,26 +12,28 @@ class CIRep:
     m_field_names = [
         # Dont change the field name order
         # m_constraints needs it to be in this order
-        "activity",
-        "requestor",
-        "responder",
-        "event-source",
-        "event-sink",
-        "tx-id",
-        "parent-tx-id",
-        "sent-at",
-        "received-at",
-        "if-fnx-name",
-        "event-name",
-        "req-desc",
-        "resp-desc",
-        "ev-desc"
+        "activity",         #a
+        "requestor",        #b
+        "responder",        #c
+        "event-source",     #d
+        "event-sink",       #e
+        "tx-id",            #f
+        "parent-tx-id",     #g
+        "sent-at",          #h
+        "received-at",      #i
+        "if-fnx-name",      #j
+        "event-name",       #k
+        "req-desc",         #l
+        "resp-desc",        #m
+        "ev-desc"           #n
     ]
 
     m_constraints = {
-        # M - Mandatory
-        # O - Optional
-        # X - Prohibited
+                            # M - Mandatory
+                            # O - Optional
+                            # X - Prohibited
+
+                            #abcdefghijklmn
         "request/source"  : "MMOXXMOMXMXOXX",
         "request/sink"    : "MOMXXMOOMMXOXX",
         "response/sink"   : "MOMXXMOMXMXXOX",
@@ -58,6 +61,37 @@ class CIRep:
     @property
     def field_dict(self):
         return self.m_field_dict
+
+    def validate(self):
+        constraint_key = self.m_field_dict["activity"] + "/" + \
+                         "source" if self.m_source else "sink"
+        constraint_val = self.m_constraints[constraint_key]
+
+        #print(f"constraint_key = {constraint_key}", file=sys.stderr)
+        #print(f"constraint_val = {constraint_val}", file=sys.stderr)
+
+        index = 0
+        error = None
+        for key in self.m_field_dict:
+            #print(f"index={index},key={key}", file=sys.stderr)
+
+            # note that self.m_field_dict is an OrderedDict
+            constraint = constraint_val[index]
+            index += 1
+
+            if (constraint == 'M' and 
+                self.m_field_dict[key] == None):
+                error = f"Value not specified for {key}"
+                break
+
+            if (constraint == 'X' and 
+                self.m_field_dict[key] != None):
+                error = f"Value must not be specified for {key}"
+                break
+
+        ret = (error == None)
+        return (ret, error)
+
 
     def __str__(self):
         csnv = []
@@ -88,10 +122,20 @@ class TestCIRep(unittest.TestCase):
         self.assertEqual(exp_result, act_result)
 
 
+    def test_cirep_validate_1 (self):
+        ci_rep = CIRep("request", True)
+        fd = ci_rep.field_dict
+        fd["requestor"] = "Comp-A"
+        fd["responder"] = "Comp-B"
+        fd["tx-id"]     = 100
+        fd["if-fnx-name"] = "segrecv/publish"
+
+        (valid, error) = ci_rep.validate()
+
+        self.assertEqual(valid, False)
+        self.assertEqual(error, "Value not specified for sent-at")
+
+
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
 
