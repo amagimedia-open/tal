@@ -81,12 +81,12 @@ class CIRep:
 
             if (constraint == 'M' and 
                 self.m_field_dict[key] == None):
-                error = f"Value not specified for {key}"
+                error = f"Value for {key} mandatory"
                 break
 
             if (constraint == 'X' and 
                 self.m_field_dict[key] != None):
-                error = f"Value must not be specified for {key}"
+                error = f"Value for {key} prohibited"
                 break
 
         ret = (error == None)
@@ -119,6 +119,7 @@ class TestCIRep(unittest.TestCase):
         exp_result = "activity=request,requestor=Comp-A,responder=Comp-B,tx-id=100,if-fnx-name=segrecv/publish"
         act_result = str(ci_rep)
 
+
         self.assertEqual(exp_result, act_result)
 
 
@@ -133,7 +134,22 @@ class TestCIRep(unittest.TestCase):
         (valid, error) = ci_rep.validate()
 
         self.assertEqual(valid, False)
-        self.assertEqual(error, "Value not specified for sent-at")
+        self.assertEqual(error, "Value for sent-at mandatory")
+
+    def test_cirep_validate_2 (self):
+        ci_rep = CIRep("request", True)
+        fd = ci_rep.field_dict
+        fd["requestor"] = "Comp-A"
+        fd["responder"] = "Comp-B"
+        fd["tx-id"]     = 100
+        fd["if-fnx-name"] = "segrecv/publish"
+        fd["sent-at"] = "2"
+        fd["event-source"] = "foo"
+
+        (valid, error) = ci_rep.validate()
+
+        self.assertEqual(valid, False)
+        self.assertEqual(error, "Value for event-source prohibited")
 
 
 if __name__ == '__main__':
