@@ -5,9 +5,9 @@
 import simpy
 
 def producer(id, env, store):
-        item = f"p-{id}-item"
-        print(f'Producer {id} Producing {item} at', env.now)
-        yield store.put(f'{item}')
+    item = f"p-{id}-item"
+    print(f'Producer {id} Producing {item} at', env.now)
+    yield store.put(f'{item}')
 
 def consumer(id, env, store):
     while True:
@@ -16,7 +16,7 @@ def consumer(id, env, store):
         yield env.timeout(1)
 
 env = simpy.Environment()
-store = simpy.Store(env, capacity=1)
+store = simpy.Store(env)
 
 consumer  =  env.process(consumer("X", env, store))
 producers = [env.process(producer(i, env, store)) for i in ["A", "B", "C"]]
