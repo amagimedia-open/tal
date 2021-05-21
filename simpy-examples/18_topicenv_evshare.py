@@ -12,14 +12,14 @@ class School:
             yield self.env.timeout(45)
             self.class_ends.succeed()
             self.class_ends = self.env.event()
-            print("BELL")
+            print(f"BELL at {env.now}")
 
     def pupil(self, id):
         for i in range(2):
             #print(r' \o/%c' % id, end='')
-            print("<B %c" % id)
+            print("<B %c at %d" % (id, env.now))
             yield self.class_ends
-            print(">B %c" % id)
+            print(">B %c at %d" % (id, env.now))
 
 env = simpy.Environment()
 

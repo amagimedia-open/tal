@@ -10,8 +10,8 @@ def segment_dispatcher(env):
 
         ci_rep = CIRep("request", True)
         fd     = ci_rep.field_dict
-        fd["requestor"]   = "segment_dispatcher"
-        fd["responder"]   = "segment_receiver"
+        fd["requestor"]   = "seg_dispatcher"
+        fd["responder"]   = "seg_receiver"
         fd["if-fnx-name"] = "segrecv/publish"
         fd["sent-at"]     = env.now
         fd["tx-id"]       = tx_id
@@ -20,14 +20,15 @@ def segment_dispatcher(env):
         g_dispatch_event.succeed(value=tx_id)
         g_dispatch_event = env.event()
 
+
 def segment_receiver(env):
     while True:
         tx_id = yield g_dispatch_event
 
         ci_rep = CIRep("request", False)
         fd     = ci_rep.field_dict
-        fd["requestor"]   = "segment_dispatcher"
-        fd["responder"]   = "segment_receiver"
+        fd["requestor"]   = "seg_dispatcher"
+        fd["responder"]   = "seg_receiver"
         fd["if-fnx-name"] = "segrecv/publish"
         fd["received-at"] = env.now
         fd["tx-id"]       = tx_id
