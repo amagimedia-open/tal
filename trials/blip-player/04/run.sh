@@ -11,8 +11,8 @@ python $DIRNAME/n_prod_1_cons_store.py
 
 echo
 
-echo "#---[n_prod_n_cons_store]---"
-python $DIRNAME/n_prod_n_cons_store.py
+echo "#---[n_prod_m_cons_store]---"
+python $DIRNAME/n_prod_m_cons_store.py
 
 set +u
 deactivate
