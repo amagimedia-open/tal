@@ -13,6 +13,7 @@ export TAL_VENV_ACTIVATE_FILE_PATH=$TAL_VENV_FOLDER_PATH/env/bin/activate
 
 export LC_ALL=C
 export PYTHONIOENCODING=utf-8
+export PYTHONPATH=$TAL_FOLDER_PATH/src
 
 #+---------------+
 #| PATH variable |
