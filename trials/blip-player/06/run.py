@@ -69,7 +69,7 @@ def create_ci_rep(activity, is_source, reqtr, respdr, if_name, tx_id):
 
 #----------------------------------------------------------------------------
 
-def seg_send(env, ev_store, segments):
+def seg_sendr(env, ev_store, segments):
 
     global g_tx_id
 
@@ -86,7 +86,7 @@ def seg_send(env, ev_store, segments):
             yield env.timeout(wait_for)
 
         seg = Segment(seg_id, duration, asset_list)
-        seg_req = SegmentRequest(env, "seg_send", g_tx_id, "publish", seg, effect_at)
+        seg_req = SegmentRequest(env, "seg_sendr", g_tx_id, "publish", seg, effect_at)
         g_tx_id += 1
         ev_store.put(seg_req)
         print(f"now={env.now},reason=sent_seg_req")
@@ -99,7 +99,7 @@ def seg_send(env, ev_store, segments):
 
 #----------------------------------------------------------------------------
 
-def seg_recv(env, ev_store):
+def seg_recvr(env, ev_store):
 
     while True:
 
@@ -109,7 +109,7 @@ def seg_recv(env, ev_store):
                     "request",
                     False,
                     seg_req.requestor,
-                    "seg_recv",
+                    "seg_recvr",
                     seg_req.if_name,
                     seg_req.tx_id)
         print(ci_rep)
@@ -133,8 +133,8 @@ g_segments = [
 env = simpy.Environment()
 ev_store = simpy.Store(env)
 
-env.process(seg_send(env, ev_store, g_segments))
-env.process(seg_recv(env, ev_store))
+env.process(seg_sendr(env, ev_store, g_segments))
+env.process(seg_recvr(env, ev_store))
 
 env.run(until=100)
 
