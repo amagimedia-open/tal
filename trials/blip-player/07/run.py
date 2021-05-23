@@ -84,12 +84,12 @@ def debugm (obj,msg):
 
 #----------------------------------------------------------------------------
 
-def wait_for_event(obj, event_at, comment):
+def calc_wait_for (obj,event_at):
 
     wait_for = event_at - (obj.m_env.now + obj.m_look_ahead)
-    if (wait_for > 0):
-        debugm (obj, f"wait_for={wait_for},comment={comment}")
-        yield env.timeout(wait_for)
+    debugm (obj, f"event_at={event_at},lookahead={obj.m_look_ahead}," +\
+                 f"wait_for={wait_for}")
+    return wait_for
 
 #----------------------------------------------------------------------------
 
@@ -109,7 +109,7 @@ class SegmentSender:
 
             (command, params) = instr
 
-            debugm (self, f"comment={instr}")
+            debugm (self, f"instr={instr}")
 
             if (command == "waitfor"):
 
@@ -158,17 +158,27 @@ class SegmentReceiver:
 
             in_req.dump_as_incoming_ci (self)
 
+            debugm (self, f"instr={in_req.instruction}")
+
             if (in_req.command == "publseg"):
 
                 #---[command params]---
 
                 params   = in_req.params
+                seg_id   = params[0]
                 duration = params[1]
                 start_at = params[3]
 
+                #debugm (self, f"duration={duration},start_at={start_at}")
+
                 #---[pre publish wait]---
 
-                wait_for_event (self, start_at, "pre publseg")
+                wait_for = calc_wait_for (self, start_at)
+                if (wait_for > 0):
+                    debugm (self,
+                            f"wait_for={wait_for},seg_id={seg_id}," +\
+                            f"comment=pre publseg")
+                    yield env.timeout(wait_for)
 
                 #---[publish]---
 
@@ -181,7 +191,12 @@ class SegmentReceiver:
                 #---[post publish wait]---
 
                 seg_end_time = start_at + duration
-                wait_for_event (self, seg_end_time, "post publseg")
+                wait_for = calc_wait_for (self, seg_end_time)
+                if (wait_for > 0):
+                    debugm (self,
+                            f"wait_for={wait_for},seg_id={seg_id}," +\
+                            f"comment=post publseg")
+                    yield env.timeout(wait_for)
 
 #----------------------------------------------------------------------------
 
@@ -212,11 +227,14 @@ class SegmentItemSequencer:
 
             in_req.dump_as_incoming_ci (self)
 
+            debugm (self, f"instr={in_req.instruction}")
+
             if (in_req.command == "publseg"):
 
                 #---[command data]---
 
                 params     = in_req.params
+                seg_id     = params[0]
                 asset_list = params[2]
                 start_at   = params[3]
 
@@ -225,15 +243,22 @@ class SegmentItemSequencer:
                     asset_id  = asset_info[0]
                     asset_len = asset_info[1]
 
-                    debugm (self, f"asset={asset_id},len={asset_len},start_at={start_at}")
+                    debugm (self, 
+                            f"seg_id={seg_id},asset={asset_id}," +\
+                            f"len={asset_len},start_at={start_at}")
 
                     #---[wait before play cmd issue]---
 
-                    wait_for_event (self, start_at, "before issuing play command")
+                    wait_for = calc_wait_for (self, start_at)
+                    if (wait_for > 0):
+                        debugm (self,
+                                f"wait_for={wait_for},asset_id={asset_id}," +\
+                                f"comment=before issuing play command")
+                        yield env.timeout(wait_for)
 
                     #---[issue play command]---
 
-                    instr = ("play", (asset_id, asset_len, start_at, self.m_env.now))
+                    instr = ("play", (seg_id, asset_id, asset_len, start_at, self.m_env.now))
                     out_req = Request (self, instr, in_req.tx_id)
 
                     self.m_out_store.put (out_req)
@@ -243,7 +268,12 @@ class SegmentItemSequencer:
                     #---[wait after play cmd issue]---
 
                     asset_end_time = start_at + asset_len
-                    wait_for_event (self, asset_end_time, "after issuing play command")
+                    wait_for = calc_wait_for (self, asset_end_time)
+                    if (wait_for > 0):
+                        debugm (self,
+                                f"wait_for={wait_for},asset_id={asset_id}," +\
+                                f"comment=after issuing play command")
+                        yield env.timeout(wait_for)
 
                     #---[advance start_at]---
 
@@ -278,13 +308,15 @@ class Player:
                 #---[command data]---
 
                 params    = in_req.params
-                asset_id  = params[0]
-                asset_len = params[1]
-                start_at  = params[2]
-                req_at    = params[3]
+                seg_id    = params[0]
+                asset_id  = params[1]
+                asset_len = params[2]
+                start_at  = params[3]
+                req_at    = params[4]
 
-                debugm (self, f"command=play,asset={asset_id},len={asset_len},\
-                start_at={start_at},req_at={req_at}")
+                debugm (self, f"command=play,seg_id={seg_id}," +\
+                              f"asset={asset_id},len={asset_len}," +\
+                              f"start_at={start_at},req_at={req_at}")
 
 #----------------------------------------------------------------------------
 
