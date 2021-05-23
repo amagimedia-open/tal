@@ -4,6 +4,38 @@ from CI import CIRep
 
 #----------------------------------------------------------------------------
 
+"""
+    +-------------------------------------+
+    | SegmentSender                       |
+    | (acts on instructions and sends     |
+    |  them to SegmentReceiver)           |
+    +-------------------------------------+
+                    |
+                    V
+    +-------------------------------------+
+    | SegmentReceiver                     |
+    | (receives instructions and forwards |
+    |  it to SegmentItemSequencer with a  |
+    |  lookahead delay)                   |
+    +-------------------------------------+
+                    |
+                    V
+    +-------------------------------------+
+    | SegmentItemSequencer                |
+    | (receives segment data and sequences|
+    |  assets with the player with a      |
+    |  lookahead delay)                   |
+    +-------------------------------------+
+                    |
+                    V
+    +-------------------------------------+
+    | Player                              |
+    | (receives asset playout data)       |
+    +-------------------------------------+
+"""
+
+#----------------------------------------------------------------------------
+
 class Request:
 
     def __init__(self, obj, instruction, p_tx_id='None'):
@@ -63,8 +95,8 @@ class Request:
         fd["parent-tx-id"] = self.p_tx_id
         fd["received-at"]  = obj.m_env.now
 
-        #print(ci_rep)
-        print(f"now={self.m_obj.m_env.now},{ci_rep}")
+        print(ci_rep)
+        #print(f"now={self.m_obj.m_env.now},{ci_rep}")
 
     def __repr__(self):
 
