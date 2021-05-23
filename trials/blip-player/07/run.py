@@ -16,6 +16,7 @@ class Request:
         tx_id = f"{obj.m_who}-{obj.m_tx_counter}"
         obj.m_tx_counter += 1
 
+        self.m_obj       = obj
         self.m_instr     = instruction
         self.m_sent_at   = obj.m_env.now
         self.m_requestor = obj.m_who
@@ -54,17 +55,16 @@ class Request:
 
         ci_rep = CIRep("request", False)
         fd     = ci_rep.field_dict
+
         fd["requestor"]    = self.requestor
         fd["responder"]    = obj.m_who
         fd["if-fnx-name"]  = self.command
         fd["tx-id"]        = self.tx_id
         fd["parent-tx-id"] = self.p_tx_id
-        if (is_source):
-            fd["sent-at"]     = obj.m_env.now
-        else:
-            fd["received-at"] = obj.m_env.now
+        fd["received-at"]  = obj.m_env.now
 
-        print(ci_rep)
+        #print(ci_rep)
+        print(f"now={self.m_obj.m_env.now},{ci_rep}")
 
     def __repr__(self):
 
@@ -80,6 +80,7 @@ def debugm (obj,msg):
 
     print(f"now={obj.m_env.now},who={obj.m_who},{msg}",\
           file=sys.stderr)
+    sys.stderr.flush()
 
 #----------------------------------------------------------------------------
 
@@ -108,7 +109,7 @@ class SegmentSender:
 
             (command, params) = instr
 
-            debugm (self, f"comment=processing {command}")
+            debugm (self, f"comment={instr}")
 
             if (command == "waitfor"):
 
@@ -153,15 +154,9 @@ class SegmentReceiver:
 
         while True:
 
-            #---[incoming request]---
-
-            in_req = yield in_store.get()
-
-            #---[dump component interaction representation]---
+            in_req = yield self.m_in_store.get()
 
             in_req.dump_as_incoming_ci (self)
-
-            #---[handle command(s)]---
 
             if (in_req.command == "publseg"):
 
@@ -173,7 +168,7 @@ class SegmentReceiver:
 
                 #---[pre publish wait]---
 
-                wait_for_event (obj, start_at, "pre publseg")
+                wait_for_event (self, start_at, "pre publseg")
 
                 #---[publish]---
 
@@ -181,7 +176,7 @@ class SegmentReceiver:
 
                 self.m_out_store.put (out_req)
 
-                debugm ("sent {out_req.command} command")
+                debugm (self, f"sent {out_req.command} command")
 
                 #---[post publish wait]---
 
@@ -213,17 +208,11 @@ class SegmentItemSequencer:
 
         while True:
 
-            #---[incoming request]---
-
-            in_req = yield in_store.get()
-
-            #---[dump component interaction representation]---
+            in_req = yield self.m_in_store.get()
 
             in_req.dump_as_incoming_ci (self)
 
-            #---[handle command(s)]---
-
-            if (command == "publseg"):
+            if (in_req.command == "publseg"):
 
                 #---[command data]---
 
@@ -236,7 +225,7 @@ class SegmentItemSequencer:
                     asset_id  = asset_info[0]
                     asset_len = asset_info[1]
 
-                    debugm (self, "asset={asset_id},len={asset_len},start_at={start_at}")
+                    debugm (self, f"asset={asset_id},len={asset_len},start_at={start_at}")
 
                     #---[wait before play cmd issue]---
 
@@ -249,14 +238,14 @@ class SegmentItemSequencer:
 
                     self.m_out_store.put (out_req)
 
-                    debugm ("comment=sent {out_req.command} command")
+                    debugm (self, f"comment=sent {out_req.command} command")
 
                     #---[wait after play cmd issue]---
 
                     asset_end_time = start_at + asset_len
                     wait_for_event (self, asset_end_time, "after issuing play command")
 
-                    #---[advance to start of next asset]---
+                    #---[advance start_at]---
 
                     start_at += asset_len
 
@@ -265,8 +254,7 @@ class SegmentItemSequencer:
 class Player:
 
     def __init__(self, 
-                 env, 
-                 in_store):
+                 env):
 
         self.m_env      = env
         self.m_who      = "plyr"
@@ -277,19 +265,13 @@ class Player:
     def comm(self):
         return self.m_in_store
 
-    def run(self);
+    def run(self):
 
         while True:
 
-            #---[incoming request]---
-
-            in_req = yield in_store.get()
-
-            #---[dump component interaction representation]---
+            in_req = yield self.m_in_store.get()
 
             in_req.dump_as_incoming_ci (self)
-
-            #---[handle command(s)]---
 
             if (in_req.command == "play"):
 
@@ -301,7 +283,7 @@ class Player:
                 start_at  = params[2]
                 req_at    = params[3]
 
-                debugm (self, "command=play,asset={asset_id},len={asset_len},\
+                debugm (self, f"command=play,asset={asset_id},len={asset_len},\
                 start_at={start_at},req_at={req_at}")
 
 #----------------------------------------------------------------------------
@@ -317,7 +299,7 @@ g_ss_instructions = [
      20)),      # start at
 
 ("waitfor", 
-    (5)),       # sleep duration
+    (5,)),       # sleep duration
 
 ("publseg", 
     ("B/v1", 
@@ -335,9 +317,15 @@ env = simpy.Environment()
 plyr = Player (env)
 sis  = SegmentItemSequencer (env, plyr.comm, g_play_cmd_look_ahead)
 sr   = SegmentReceiver (env, sis.comm, g_publish_segment_look_ahead)
-ss   = SegmentSender (env, sr.comm, g_ss_instructions))
+ss   = SegmentSender (env, sr.comm, g_ss_instructions)
 
 #---[start main event loop]---
 
-env.run(until=100)
+#env.run(until=100)
+
+until = 100
+while env.peek() < until:
+    x = input (f"{env.now}:<enter> to step:")
+    #print('#Stepping')
+    env.step()
 
