@@ -10,7 +10,7 @@ class Request:
 
         """
         instruction must be of the form (cmd, (param1, param2, ...))
-        p_tx_id is parent tx_id
+        p_tx_id is 'parent tx_id'
         """
 
         tx_id = f"{obj.m_who}-{obj.m_tx_counter}"
@@ -50,7 +50,7 @@ class Request:
     def p_tx_id(self):
         return self.m_p_tx_id
 
-    def dump_as_incoming_ci(obj):
+    def dump_as_incoming_ci(self, obj):
 
         ci_rep = CIRep("request", False)
         fd     = ci_rep.field_dict
@@ -76,16 +76,18 @@ class Request:
 
 #----------------------------------------------------------------------------
 
-def debugc(obj,msg):
+def debugm (obj,msg):
 
     print(f"now={obj.m_env.now},who={obj.m_who},{msg}",\
           file=sys.stderr)
+
+#----------------------------------------------------------------------------
 
 def wait_for_event(obj, event_at, comment):
 
     wait_for = event_at - (obj.m_env.now + obj.m_look_ahead)
     if (wait_for > 0):
-        debugc (obj, f"wait_for={wait_for},comment={comment}")
+        debugm (obj, f"wait_for={wait_for},comment={comment}")
         yield env.timeout(wait_for)
 
 #----------------------------------------------------------------------------
@@ -103,16 +105,15 @@ class SegmentSender:
 
         for instr in instructions:
 
-            command = instr[0]
-            params  = instr[1]
+            (command, params) = instr
 
-            debugc (self, f"comment=processing {command}")
+            debugm (self, f"comment=processing {command}")
 
             if (command == "waitfor"):
 
                 duration = params[0]
 
-                debugc (self, f"comment=waitfor {duration} units")
+                debugm (self, f"comment=waitfor {duration} units")
 
                 yield env.timeout(duration)
 
@@ -122,7 +123,7 @@ class SegmentSender:
 
                 self.m_out_store.put (Request (self, instr))
 
-                debugc (self, f"comment=sent {command} command")
+                debugm (self, f"comment=sent {command} command")
 
                 continue
 
@@ -175,7 +176,7 @@ class SegmentReceiver:
 
                 self.m_out_store.put (out_req)
 
-                debugc ("sent {out_req.command} command")
+                debugm ("sent {out_req.command} command")
 
                 #---[post publish wait]---
 
@@ -226,7 +227,7 @@ class SegmentItemSequencer:
                     asset_id  = asset_info[0]
                     asset_len = asset_info[1]
 
-                    debugc (self, "asset={asset_id},len={asset_len},start_at={start_at}")
+                    debugm (self, "asset={asset_id},len={asset_len},start_at={start_at}")
 
                     #---[wait before play cmd issue]---
 
@@ -239,7 +240,7 @@ class SegmentItemSequencer:
 
                     self.m_out_store.put (out_req)
 
-                    debugc ("comment=sent {out_req.command} command")
+                    debugm ("comment=sent {out_req.command} command")
 
                     #---[wait after play cmd issue]---
 
@@ -284,39 +285,69 @@ class Player:
                 asset_id  = params[0]
                 asset_len = params[1]
                 start_at  = params[2]
-                sent_at   = params[3]
+                req_at    = params[3]
 
-                debugc (self, "command=play,asset={asset_id},len={asset_len},\
-                start_at={start_at},sent_at={sent_at}")
+                debugm (self, "command=play,asset={asset_id},len={asset_len},\
+                start_at={start_at},req_at={req_at}")
 
 #----------------------------------------------------------------------------
 
-g_publish_look_ahead = 10
+g_publish_segment_look_ahead = 10
+g_play_cmd_look_ahead = 5
 
 g_instructions = [
-    # (seg_name, duration, asset_list, start_at)
-    ("publseg", 
-        ("A/v1", 
-         30, 
-         [ ("x", 5), ("y", 20),("z", 5)  ], 
-         20)),
+("publseg", 
+    ("A/v1",    # segment name
+     30,        # duration
+     [ ("x", 5), ("y", 20),("z", 5)  ], # asset list
+     20)),      # start at
 
-    ("waitfor", (5)),
+("waitfor", 
+    (5)),       # sleep duration
 
-    ("publseg", 
-        ("B/v1", 
-         30, 
-         [ ("x", 5), ("c", 15),("d", 10) ], 
-         50))
+("publseg", 
+    ("B/v1", 
+     30, 
+     [ ("x", 5), ("c", 15),("d", 10) ], 
+     50))
 ]
 
 #----------------------------------------------------------------------------
 
 env = simpy.Environment()
-ev_store = simpy.Store(env)
 
-env.process(seg_sendr(env, ev_store, g_segments))
-env.process(seg_recvr(env, ev_store))
+#---[stores]---
+
+segrecv_store    = simpy.Store (env)
+segitemseq_store = simpy.Store (env)
+player_store     = simpy.Store (env)
+
+#---[define services]---
+
+ss = SegmentSender (env, segrecv_store)
+
+sr = SegmentReceiver (\
+        env,\
+        segrecv_store,\
+        segitemseq_store,\
+        g_publish_segment_look_ahead)
+
+sis = SegmentItemSequencer (\
+        env, \
+        segitemseq_store,\
+        player_store,\
+        g_play_cmd_look_ahead)
+
+plyr = Player (env, player_store)
+
+#---[start services]---
+
+env.process(plyr.run())
+env.process(sis.run())
+env.process(sr.run())
+env.process(ss.run(g_instructions))
+
+#---[start main event loop]---
 
 env.run(until=100)
 
