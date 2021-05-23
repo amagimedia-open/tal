@@ -4,27 +4,89 @@ from CI import CIRep
 
 #----------------------------------------------------------------------------
 
-def create_ci_rep(activity, 
-                  is_source, 
-                  reqtr, 
-                  respdr, 
-                  if_name, 
-                  tx_id, 
-                  p_tx_id):
+class Request:
 
-    ci_rep = CIRep(activity, is_source)
-    fd     = ci_rep.field_dict
-    fd["requestor"]    = reqtr
-    fd["responder"]    = respdr
-    fd["if-fnx-name"]  = if_name
-    fd["tx-id"]        = tx_id
-    fd["parent-tx-id"] = p_tx_id
-    if (is_source):
-        fd["sent-at"]     = env.now
-    else:
-        fd["received-at"] = env.now
+    def __init__(self, obj, instruction, p_tx_id=None):
 
-    return ci_rep
+        """
+        instruction must be of the form (cmd, (param1, param2, ...))
+        p_tx_id is parent tx_id
+        """
+
+        tx_id = f"{obj.m_who}-{obj.m_tx_counter}"
+        obj.m_tx_counter += 1
+
+        self.m_instr     = instruction
+        self.m_sent_at   = obj.m_env.now
+        self.m_requestor = obj.m_who
+        self.m_tx_id     = tx_id
+        self.m_p_tx_id   = p_tx_id
+
+    @property
+    def instruction(self):
+        return self.m_instr
+
+    @property
+    def command(self):
+        return self.m_instr[0]
+
+    @property
+    def params(self):
+        return self.m_instr[1]
+
+    @property
+    def sent_at(self):
+        return self.m_sent_at
+
+    @property
+    def requestor(self):
+        return self.m_requestor
+
+    @property
+    def tx_id(self):
+        return self.m_tx_id
+
+    @property
+    def p_tx_id(self):
+        return self.m_p_tx_id
+
+    def dump_as_incoming_ci(obj):
+
+        ci_rep = CIRep("request", False)
+        fd     = ci_rep.field_dict
+        fd["requestor"]    = self.requestor
+        fd["responder"]    = obj.m_who
+        fd["if-fnx-name"]  = self.command
+        fd["tx-id"]        = self.tx_id
+        fd["parent-tx-id"] = self.p_tx_id
+        if (is_source):
+            fd["sent-at"]     = obj.m_env.now
+        else:
+            fd["received-at"] = obj.m_env.now
+
+        print(ci_rep)
+
+    def __repr__(self):
+
+        return (self.m_instr,
+                self.m_sent_at,
+                self.m_requestor,
+                self.m_tx_id,
+                self.m_p_tx_id)
+
+#----------------------------------------------------------------------------
+
+def debugc(obj,msg):
+
+    print(f"now={obj.m_env.now},who={obj.m_who},{msg}",\
+          file=sys.stderr)
+
+def wait_for_event(obj, event_at, comment):
+
+    wait_for = event_at - (obj.m_env.now + obj.m_look_ahead)
+    if (wait_for > 0):
+        debugc (obj, f"wait_for={wait_for},comment={comment}")
+        yield env.timeout(wait_for)
 
 #----------------------------------------------------------------------------
 
@@ -33,47 +95,34 @@ class SegmentSender:
     def __init__(self, env, out_store):
 
         self.m_env        = env
-        self.m_out_store  = out_store
-        self.m_tx_counter = 0
         self.m_who        = "ss"
+        self.m_tx_counter = 0
+        self.m_out_store  = out_store
 
     def run(self, instructions):
 
         for instr in instructions:
 
-            command    = instr[0]
-            data       = instr[1]
+            command = instr[0]
+            params  = instr[1]
 
-            print(f"now={env.now},\
-            who={who},\
-            comment=processing {command}", 
-            file=sys.stderr)
+            debugc (self, f"comment=processing {command}")
 
             if (command == "waitfor"):
 
-                duration = data[0]
+                duration = params[0]
 
-                print(f"now={env.now},\
-                who={self.m_who},\
-                comment=waitfor {duration} units",
-                file=sys.stderr)
+                debugc (self, f"comment=waitfor {duration} units")
 
                 yield env.timeout(duration)
 
                 continue
 
-            if (command == "publish"):
+            if (command == "publseg"):
 
-                tx_id = f"{self.m_who}-{self.m_tx_counter}"
-                self.m_tx_counter += 1
+                self.m_out_store.put (Request (self, instr))
 
-                req = (instr, env.now, self.m_who, tx_id, None)
-                self.m_out_store.put(req)
-
-                print(f"now={env.now},\
-                who={self.m_who},\
-                comment=sent {command} command",
-                file=sys.stderr)
+                debugc (self, f"comment=sent {command} command")
 
                 continue
 
@@ -88,83 +137,50 @@ class SegmentReceiver:
                  publish_look_ahead):
 
         self.m_env        = env
+        self.m_who        = "sr"
+        self.m_tx_counter = 0
         self.m_in_store   = in_store
         self.m_out_store  = out_store
-        self.m_pll        = publish_look_ahead
-        self.m_tx_counter = 0
-        self.m_who        = "sr"
+        self.m_look_ahead = publish_look_ahead
 
     def run(self):
 
         while True:
 
-            req = yield in_store.get()
+            #---[incoming request]---
 
-            instr     = req[0]
-            command   = instr[0]
-            data      = instr[1]
-            sent_at   = req[1]
-            requestor = req[2]
-            tx_id     = req[3]
-            p_tx_id   = req[4]
+            in_req = yield in_store.get()
 
-            ci_rep = create_ci_rep(
-                        "request",
-                        False,
-                        requestor,
-                        self.m_who,
-                        command,
-                        tx_id,
-                        p_tx_id)
-            print(ci_rep)
+            #---[dump component interaction representation]---
 
-            if (command == "publish"):
+            in_req.dump_as_incoming_ci (self)
 
-                #---[command data]---
+            #---[handle command(s)]---
 
-                seg_id     = data[0]
-                duration   = data[1]
-                asset_list = data[2]
-                effect_at  = data[3]
+            if (in_req.command == "publseg"):
+
+                #---[command params]---
+
+                params   = in_req.params
+                duration = params[1]
+                start_at = params[3]
 
                 #---[pre publish wait]---
 
-                wait_for = effect_at - (env.now + self.m_pll)
-                if (wait_for > 0):
-
-                    print(f"now={env.now},\
-                    who={self.m_who},\
-                    comment=waitfor {wait_for} before publish",
-                    file=sys.stderr)
-
-                    yield env.timeout(wait_for)
+                wait_for_event (obj, start_at, "pre publseg")
 
                 #---[publish]---
 
-                p_tx_id = tx_id
-                tx_id = f"{self.m_who}-{self.m_tx_counter}"
-                self.m_tx_counter += 1
+                out_req = Request (self, in_req.instruction, in_req.tx_id)
 
-                req = (instr, env.now, self.m_who, tx_id, p_tx_id)
-                self.m_out_store.put(req)
+                self.m_out_store.put (out_req)
 
-                print(f"now={env.now},\
-                who={self.m_who},\
-                comment=sent {command} command",
-                file=sys.stderr)
+                debugc ("sent {out_req.command} command")
 
                 #---[post publish wait]---
 
-                seg_end_time = effect_at + duration
-                wait_for     = seg_end_time - (env.now + self.m_pll)
-                if (wait_for > 0):
-
-                    print(f"now={env.now},\
-                    who={self.m_who},\
-                    comment=waitfor {wait_for} after publish",
-                    file=sys.stderr)
-
-                    yield env.timeout(wait_for)
+                seg_end_time = start_at + duration
+                wait_for_event (self, seg_end_time, "post publseg")
 
 #----------------------------------------------------------------------------
 
@@ -177,104 +193,62 @@ class SegmentItemSequencer:
                  playout_look_ahead):
 
         self.m_env        = env
+        self.m_who        = "sis"
+        self.m_tx_counter = 0
         self.m_in_store   = in_store
         self.m_out_store  = out_store
-        self.m_pll        = playout_look_ahead
-        self.m_tx_counter = 0
-        self.m_who        = "sis"
+        self.m_look_ahead = playout_look_ahead
 
     def run(self):
 
         while True:
 
-            req = yield in_store.get()
+            #---[incoming request]---
 
-            instr     = req[0]
-            command   = instr[0]
-            data      = instr[1]
-            sent_at   = req[1]
-            requestor = req[2]
-            tx_id     = req[3]
-            p_tx_id   = req[4]
+            in_req = yield in_store.get()
 
-            ci_rep = create_ci_rep(
-                        "request",
-                        False,
-                        requestor,
-                        self.m_who,
-                        command,
-                        tx_id,
-                        p_tx_id)
-            print(ci_rep)
+            #---[dump component interaction representation]---
 
-            if (command == "publish"):
+            in_req.dump_as_incoming_ci (self)
+
+            #---[handle command(s)]---
+
+            if (command == "publseg"):
 
                 #---[command data]---
 
-                seg_id     = data[0]
-                duration   = data[1]
-                asset_list = data[2]
-                effect_at  = data[3]
-                index      = 0
-                p_tx_id    = tx_id
+                params     = in_req.params
+                asset_list = params[2]
+                start_at   = params[3]
 
                 for asset_info in asset_list:
 
                     asset_id  = asset_info[0]
                     asset_len = asset_info[1]
 
-                    print(f"now={env.now},\
-                    who={self.m_who},\
-                    asset={asset_id},
-                    len={asset_len},
-                    comment=playout at {effect_at}",
-                    file=sys.stderr)
+                    debugc (self, "asset={asset_id},len={asset_len},start_at={start_at}")
 
-                    #---[pre play wait]---
+                    #---[wait before play cmd issue]---
 
-                    wait_for = effect_at - (env.now + self.m_pll)
-                    if (wait_for > 0):
-
-                        print(f"now={env.now},\
-                        who={self.m_who},\
-                        asset={asset_id},
-                        len={asset_len},
-                        comment=waitfor {wait_for} before issuing play command",
-                        file=sys.stderr)
-
-                        yield env.timeout(wait_for)
+                    wait_for_event (self, start_at, "before issuing play command")
 
                     #---[issue play command]---
 
-                    tx_id = f"{self.m_who}-{self.m_tx_counter}"
-                    self.m_tx_counter += 1
+                    instr = ("play", (asset_id, asset_len, start_at, self.m_env.now))
+                    out_req = Request (self, instr, in_req.tx_id)
 
-                    command = "play"
-                    instr = (command, (asset_id, asset_len, effect_at, env.now))
-                    req = (instr, env.now, self.m_who, tx_id, p_tx_id)
-                    self.m_out_store.put(req)
+                    self.m_out_store.put (out_req)
 
-                    print(f"now={env.now},\
-                    who={self.m_who},\
-                    comment=sent {command} command for {asset_id} len {asset_len}",
-                    file=sys.stderr)
+                    debugc ("comment=sent {out_req.command} command")
 
-                    #---[pre play wait]---
+                    #---[wait after play cmd issue]---
 
-                    asset_end_time = effect_at + asset_len
-                    wait_for       = asset_end_time - (env.now + self.m_pll)
-                    if (wait_for > 0):
+                    asset_end_time = start_at + asset_len
+                    wait_for_event (self, asset_end_time, "after issuing play command")
 
-                        print(f"now={env.now},\
-                        who={self.m_who},\
-                        asset={asset_id},
-                        len={asset_len},
-                        comment=waitfor {wait_for} after issuing play command",
-                        file=sys.stderr)
+                    #---[advance to start of next asset]---
 
-                        yield env.timeout(wait_for)
-
-                    effect_at += asset_len
+                    start_at += asset_len
 
 #----------------------------------------------------------------------------
 
@@ -282,60 +256,46 @@ class Player:
 
     def __init__(self, 
                  env, 
-                 in_store, 
-                 playout_look_ahead):
+                 in_store):
 
         self.m_env        = env
-        self.m_in_store   = in_store
-        self.m_pll        = playout_look_ahead
-        self.m_tx_counter = 0
         self.m_who        = "plyr"
+        self.m_in_store   = in_store
 
     def run(self);
 
         while True:
 
-            req = yield in_store.get()
+            #---[incoming request]---
 
-            instr     = req[0]
-            command   = instr[0]
-            data      = instr[1]
-            sent_at   = req[1]
-            requestor = req[2]
-            tx_id     = req[3]
-            p_tx_id   = req[4]
+            in_req = yield in_store.get()
 
-            ci_rep = create_ci_rep(
-                        "request",
-                        False,
-                        requestor,
-                        self.m_who,
-                        command,
-                        tx_id,
-                        p_tx_id)
-            print(ci_rep)
+            #---[dump component interaction representation]---
 
-            if (command == "play"):
+            in_req.dump_as_incoming_ci (self)
+
+            #---[handle command(s)]---
+
+            if (in_req.command == "play"):
 
                 #---[command data]---
 
-                asset_id  = data[0]
-                asset_len = data[1]
-                effect_at = data[2]
-                sent_at   = data[3]
+                params    = in_req.params
+                asset_id  = params[0]
+                asset_len = params[1]
+                start_at  = params[2]
+                sent_at   = params[3]
 
-                print(f"now={env.now},\
-                who={self.m_who},\
-                comment=play command sent at {sent_at} for {asset_id} len {asset_len} at {sent_at}",
-                file=sys.stderr)
+                debugc (self, "command=play,asset={asset_id},len={asset_len},\
+                start_at={start_at},sent_at={sent_at}")
 
 #----------------------------------------------------------------------------
 
 g_publish_look_ahead = 10
 
 g_instructions = [
-    # (seg_name, duration, asset_list, effect_at)
-    ("publish", 
+    # (seg_name, duration, asset_list, start_at)
+    ("publseg", 
         ("A/v1", 
          30, 
          [ ("x", 5), ("y", 20),("z", 5)  ], 
@@ -343,7 +303,7 @@ g_instructions = [
 
     ("waitfor", (5)),
 
-    ("publish", 
+    ("publseg", 
         ("B/v1", 
          30, 
          [ ("x", 5), ("c", 15),("d", 10) ], 
