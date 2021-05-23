@@ -38,7 +38,7 @@ from CI import CIRep
 
 class Request:
 
-    def __init__(self, obj, instruction, p_tx_id='None'):
+    def __init__(self, obj, instruction, p_tx_id='-'):
 
         """
         instruction must be of the form (cmd, (param1, param2, ...))
