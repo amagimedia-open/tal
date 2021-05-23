@@ -94,12 +94,13 @@ def wait_for_event(obj, event_at, comment):
 
 class SegmentSender:
 
-    def __init__(self, env, out_store):
+    def __init__(self, env, out_store, instructions):
 
         self.m_env        = env
         self.m_who        = "ss"
         self.m_tx_counter = 0
         self.m_out_store  = out_store
+        self.m_proc       = env.process(self.run(instructions))
 
     def run(self, instructions):
 
@@ -133,16 +134,20 @@ class SegmentReceiver:
 
     def __init__(self, 
                  env, 
-                 in_store, 
                  out_store, 
                  publish_look_ahead):
 
         self.m_env        = env
         self.m_who        = "sr"
         self.m_tx_counter = 0
-        self.m_in_store   = in_store
+        self.m_in_store   = simpy.Store (env)
         self.m_out_store  = out_store
         self.m_look_ahead = publish_look_ahead
+        self.m_proc       = env.process(self.run())
+
+    @property
+    def comm(self):
+        return self.m_in_store
 
     def run(self):
 
@@ -189,16 +194,20 @@ class SegmentItemSequencer:
 
     def __init__(self, 
                  env, 
-                 in_store, 
                  out_store,
                  playout_look_ahead):
 
         self.m_env        = env
         self.m_who        = "sis"
         self.m_tx_counter = 0
-        self.m_in_store   = in_store
+        self.m_in_store   = simpy.Store (env)
         self.m_out_store  = out_store
         self.m_look_ahead = playout_look_ahead
+        self.m_proc       = env.process(self.run())
+
+    @property
+    def comm(self):
+        return self.m_in_store
 
     def run(self):
 
@@ -259,9 +268,14 @@ class Player:
                  env, 
                  in_store):
 
-        self.m_env        = env
-        self.m_who        = "plyr"
-        self.m_in_store   = in_store
+        self.m_env      = env
+        self.m_who      = "plyr"
+        self.m_in_store = simpy.Store (env)
+        self.m_proc     = env.process(self.run())
+
+    @property
+    def comm(self):
+        return self.m_in_store
 
     def run(self);
 
@@ -295,7 +309,7 @@ class Player:
 g_publish_segment_look_ahead = 10
 g_play_cmd_look_ahead = 5
 
-g_instructions = [
+g_ss_instructions = [
 ("publseg", 
     ("A/v1",    # segment name
      30,        # duration
@@ -316,36 +330,12 @@ g_instructions = [
 
 env = simpy.Environment()
 
-#---[stores]---
-
-segrecv_store    = simpy.Store (env)
-segitemseq_store = simpy.Store (env)
-player_store     = simpy.Store (env)
-
 #---[define services]---
 
-ss = SegmentSender (env, segrecv_store)
-
-sr = SegmentReceiver (\
-        env,\
-        segrecv_store,\
-        segitemseq_store,\
-        g_publish_segment_look_ahead)
-
-sis = SegmentItemSequencer (\
-        env, \
-        segitemseq_store,\
-        player_store,\
-        g_play_cmd_look_ahead)
-
-plyr = Player (env, player_store)
-
-#---[start services]---
-
-env.process(plyr.run())
-env.process(sis.run())
-env.process(sr.run())
-env.process(ss.run(g_instructions))
+plyr = Player (env)
+sis  = SegmentItemSequencer (env, plyr.comm, g_play_cmd_look_ahead)
+sr   = SegmentReceiver (env, sis.comm, g_publish_segment_look_ahead)
+ss   = SegmentSender (env, sr.comm, g_ss_instructions))
 
 #---[start main event loop]---
 
