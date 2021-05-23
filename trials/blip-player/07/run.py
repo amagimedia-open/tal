@@ -6,7 +6,7 @@ from CI import CIRep
 
 class Request:
 
-    def __init__(self, obj, instruction, p_tx_id=None):
+    def __init__(self, obj, instruction, p_tx_id='None'):
 
         """
         instruction must be of the form (cmd, (param1, param2, ...))
@@ -357,7 +357,7 @@ ss   = SegmentSender (env, sr.comm, g_ss_instructions)
 
 until = 100
 while env.peek() < until:
-    x = input (f"{env.now}:<enter> to step:")
+    #x = input (f"{env.now}:<enter> to step:")
     #print('#Stepping')
     env.step()
 
