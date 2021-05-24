@@ -19,6 +19,7 @@ MODNAME=$(basename $0)
 OPT_CLEAN=0
 OPT_ALL=0
 OPT_VENV=0
+OPT_JAVA=0
 OPT_SIMPY=0
 
 if [[ $# -gt 0 ]]
@@ -27,13 +28,14 @@ then
 
     if [[ $ARGS =~ -h ]]
     then
-        echo "usage: $MODNAME [-h] [clean|venv|simpy|all]" >&2
+        echo "usage: $MODNAME [-h] [clean|venv|simpy|java|all]" >&2
         exit 0
     fi
 
     [[ $ARGS =~ clean ]] && { OPT_CLEAN=1; }
     [[ $ARGS =~ venv  ]] && { OPT_VENV=1; }
     [[ $ARGS =~ simpy ]] && { OPT_SIMPY=1; }
+    [[ $ARGS =~ java  ]] && { OPT_JAVA=1; }
     [[ $ARGS =~ all   ]] && { OPT_ALL=1; }
 fi
 
@@ -115,6 +117,25 @@ if [[ ! -f $TAL_VENV_ACTIVATE_FILE_PATH ]]
 then
     echo "$MODNAME:virtual environment not created. use -h option for help" >&2
     exit 1
+fi
+
+if ((OPT_ALL || OPT_JAVA))
+then
+    sudo apt update
+
+    java -version
+    RET=$?
+    if ((RET == 127))
+    then
+        sudo apt install default-jre
+    fi
+
+    javac -version
+    RET=$?
+    if ((RET == 127))
+    then
+        sudo apt install default-jdk
+    fi
 fi
 
 source $TAL_VENV_ACTIVATE_FILE_PATH
