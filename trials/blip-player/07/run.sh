@@ -25,7 +25,7 @@ source $TAL_VENV_ACTIVATE_FILE_PATH
 
 cd $DIRNAME
 
-rm -vrf output
+rm -rf output
 
 mkdir output
 
@@ -33,19 +33,27 @@ export TAL_TX_NODE_TEMPLATE_FILEPATH=$PWD/data/tx_node_template.dot
 
 #---[transform ci records to csv format]---
 
+echo "ci records --> csv format" >&2
+
 python run.py run.py 2>/dev/null |\
 python csvfy_ci_records.py > output/tx_recs.csv
 
 #---[create a text tree visualization]---
 
+echo "csv format --> text tree" >&2
+
 cat output/tx_recs.csv | python tx_tree.py > output/tx_tree.txt
 
 #---[create a graphviz tree visualization]---
+
+echo "csv format --> graphviz tree" >&2
 
 cat output/tx_recs.csv | python tx_dot_tree.py > output/tx_tree.dot
 dot -Tpng output/tx_tree.dot -o output/tx_tree.png
 
 #---[create a graphviz tree visualization with hrefs]---
+
+echo "csv format --> graphviz tree with hrefs" >&2
 
 cat output/tx_recs.csv |\
     python tx_href_dot_tree.py $TMP1 \
@@ -53,6 +61,8 @@ cat output/tx_recs.csv |\
 dot -Tsvg output/tx_href_tree.dot -o output/tx_href_tree.svg
 
 #---[create a uml sequence diagram visualization with hrefs]---
+
+echo "csv format --> uml sequence diagram with hrefs" >&2
 
 cat output/tx_recs.csv |\
     python ci_seq_diag.py $TMP1 \
