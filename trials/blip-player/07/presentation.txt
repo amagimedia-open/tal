@@ -10,6 +10,7 @@
     (b) Some details about component interaction statements
 
     (c) Sample visualizations of component interaction
+
         (1) CSV format
         (2) Transaction tree (text mode)
         (3) Transaction tree (graph mode)
@@ -19,10 +20,19 @@
     (d) Advantages of each format
 
         (1) CSV format       - programmable
-        (2) Transaction tree - transaction heirarchy
-        (3) Sequence diagram - timeline interaction
+        (2) Transaction tree - transaction heirarchy with annotations
+        (3) Sequence diagram - timeline interaction with annotations
 
 (B) Discussion
+
+    (a) Define primitives 
+            Components
+            Function names
+            Transaction ids
+    (b) Pilot projects
+    (c) Documentation
+            In github
+            Inspiration: readthedocs
 
                             -x-
 

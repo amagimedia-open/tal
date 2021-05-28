@@ -32,23 +32,25 @@ export TAL_TX_NODE_TEMPLATE_FILEPATH=$PWD/data/tx_node_template.dot
 
 echo "ci records --> csv format" >&2
 
-python run.py run.py 2>/dev/null |\
+python run.py
+
+python run.py 2>/dev/null |\
 python csvfy_ci_records.py > output/tx_recs.csv
 
-csvlook output/tx_recs.csv > output/tx_recs.csv.txt
+csvlook output/tx_recs.csv > output/01_tx_recs.csv.txt
 
 #---[create a text tree visualization]---
 
 echo "csv format --> text tree" >&2
 
-cat output/tx_recs.csv | python tx_tree.py > output/tx_tree.txt
+cat output/tx_recs.csv | python tx_tree.py > output/02_tx_tree.txt
 
 #---[create a graphviz tree visualization]---
 
 echo "csv format --> graphviz tree" >&2
 
-cat output/tx_recs.csv | python tx_dot_tree.py > output/tx_tree.dot
-dot -Tpng output/tx_tree.dot -o output/tx_tree.png
+cat output/tx_recs.csv | python tx_dot_tree.py > output/03_tx_tree.dot
+dot -Tpng output/03_tx_tree.dot -o output/03_tx_tree.png
 
 #---[create a graphviz tree visualization with hrefs]---
 
@@ -56,8 +58,8 @@ echo "csv format --> graphviz tree with hrefs" >&2
 
 cat output/tx_recs.csv |\
     python tx_href_dot_tree.py $TMP1 \
-    > output/tx_href_tree.dot
-dot -Tsvg output/tx_href_tree.dot -o output/tx_href_tree.svg
+    > output/04_tx_href_tree.dot
+dot -Tsvg output/04_tx_href_tree.dot -o output/04_tx_href_tree.svg
 
 #---[create a uml sequence diagram visualization with hrefs]---
 
@@ -65,9 +67,9 @@ echo "csv format --> uml sequence diagram with hrefs" >&2
 
 cat output/tx_recs.csv |\
     python ci_seq_diag.py $TMP1 \
-    > output/tx_seq_diag.txt
-java -jar $TAL_FOLDER_PATH/3rdparty/plantuml.jar -tsvg output/tx_seq_diag.txt
-sed -i -e '1,$ s/target="_top"/target="content"/g' output/tx_seq_diag.svg
+    > output/05_tx_seq_diag.txt
+java -jar $TAL_FOLDER_PATH/3rdparty/plantuml.jar -tsvg output/05_tx_seq_diag.txt
+sed -i -e '1,$ s/target="_top"/target="content"/g' output/05_tx_seq_diag.svg
 
 set +u
 deactivate
