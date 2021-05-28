@@ -4,3 +4,5 @@ SegmentSender
 SegmentReceiver
 SegmentItemSequencer
 Player
+
+See presentation.txt

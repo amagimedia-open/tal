@@ -1,0 +1,21 @@
+Transaction (L2), Data (L3)
+
+uuid
+    - for component instances
+        - phases: 
+            Configuration
+            Initialization      
+            Running
+            Restart     - new uuid
+            Shutdown
+        - carousel
+        - coded prefix (3/4 characters)
+    - for transaction instances (at INFO level)
+    - same uuid used in DEBUG statements that
+      contains data model details
+
+Transaction data model
+
+Enumeration of component names and function points
+
+
