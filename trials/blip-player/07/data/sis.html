@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h3>SegmentItemSequencer</h3>
+    <p>Receives instructions from the
+       <a href="sr.html">SegmentReceiver</a>
+       and sequences playout of assets with the
+       <a href="plyr.html">Player</a>
+       with a look-ahead delay.</p>
+    <p>Instructions to the player are of the form <br/>
+       ("play", (seg_id, asset_id, asset_len, start_at, sent_at)) </p>
+    <p>An example delay value (in python) is as follows:</p>
+    <pre>
+    g_play_cmd_look_ahead = 5
+    </pre>
+</body>
+</html>
+

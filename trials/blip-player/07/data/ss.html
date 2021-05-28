@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h3>SegmentSender</h3>
+    <p>Consumes instructions and sends them to
+    <a href="sr.html">SegmentReceiver</a>.</p>
+    <p>Instructions are of the form <br/>
+       (instruction, (parameters-tuple)), ... </p>
+    <p>An example (in python) is as follows:</p>
+    <pre>
+    [
+    ("publseg",     # publish segment instruction
+        ("A/v1",    # segment name
+         30,        # duration
+         [ ("x", 5), ("y", 20),("z", 5)  ], # asset list
+         20)),      # start at
+
+    ("waitfor", 
+        (5,)),       # sleep duration
+
+    ("publseg", 
+        ("B/v1", 
+         30, 
+         [ ("x", 5), ("c", 15),("d", 10) ], 
+         50))
+    ]
+    </pre>
+</body>
+</html>
+

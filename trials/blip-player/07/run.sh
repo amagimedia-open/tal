@@ -22,13 +22,10 @@ plyr,file://$DIRNAME/data/plyr.html
 EOD
 
 source $TAL_VENV_ACTIVATE_FILE_PATH
-
 cd $DIRNAME
-
 rm -rf output
-
 mkdir output
-
+cp $PWD/data/tx_seq_diag_*.html output
 export TAL_TX_NODE_TEMPLATE_FILEPATH=$PWD/data/tx_node_template.dot
 
 #---[transform ci records to csv format]---
@@ -37,6 +34,8 @@ echo "ci records --> csv format" >&2
 
 python run.py run.py 2>/dev/null |\
 python csvfy_ci_records.py > output/tx_recs.csv
+
+csvlook output/tx_recs.csv > output/tx_recs.csv.txt
 
 #---[create a text tree visualization]---
 
@@ -68,6 +67,7 @@ cat output/tx_recs.csv |\
     python ci_seq_diag.py $TMP1 \
     > output/tx_seq_diag.txt
 java -jar $TAL_FOLDER_PATH/3rdparty/plantuml.jar -tsvg output/tx_seq_diag.txt
+sed -i -e '1,$ s/target="_top"/target="content"/g' output/tx_seq_diag.svg
 
 set +u
 deactivate

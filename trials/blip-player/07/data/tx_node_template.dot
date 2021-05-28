@@ -1,0 +1,51 @@
+__txidnodename__ [shape=box,label=<
+<TABLE 
+ CELLPADDING="0"
+ BORDER="0"
+ CELLSPACING="0">
+    <TR>
+        <TD 
+         TOOLTIP="transaction id"
+         BGCOLOR="#DAF7A6"
+         BORDER="1"
+         SIDES="B" 
+         COLSPAN="3">
+         __txid__
+        </TD>
+    </TR>
+    <TR>
+        <TD
+         TOOLTIP="requestor"
+         BGCOLOR="yellow" 
+         BORDER="1"
+         SIDES="B" 
+         HREF="__reqhref__">
+            __req__
+        </TD>
+        <TD
+         TOOLTIP="interface function"
+         BGCOLOR="gold" 
+         BORDER="1"
+         SIDES="B">
+            (__fnx__) 
+        </TD>
+        <TD
+         TOOLTIP="responder"
+         BGCOLOR="yellow" 
+         BORDER="1"
+         SIDES="B"
+         HREF="__rsphref__">
+            __rsp__
+        </TD>
+    </TR>
+    <TR>
+        <TD
+         TOOLTIP="time"
+         BGCOLOR="#DAF7A6"
+         COLSPAN="3"> 
+            __rcvdat__
+        </TD>
+    </TR>
+</TABLE>
+>]
+
