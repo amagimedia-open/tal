@@ -1,0 +1,31 @@
++-----------------------------------------------------+
+| Preparation of initial training material using logs |
+| Fri May 28 12:31:29 IST 2021                        |
++-----------------------------------------------------+
+
+(A) Presentation
+
+    (a) Component simulation using Simpy
+
+    (b) Some details about component interaction statements
+
+    (c) Sample visualizations of component interaction
+        (1) CSV format
+        (2) Transaction tree (text mode)
+        (3) Transaction tree (graph mode)
+        (4) Transaction tree (graph mode with links to annotations)
+        (5) Sequence diagram (links to annotations)
+
+    (d) Advantages of each format
+
+        (1) CSV format       - programmable
+        (2) Transaction tree - transaction heirarchy
+        (3) Sequence diagram - timeline interaction
+
+(B) Discussion
+
+                            -x-
+
+
+
+
