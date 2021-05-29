@@ -19,3 +19,90 @@ Transaction data model
 Enumeration of component names and function points
 
 
+                        LOG TRANSACTION MODEL
+
+        +---------+---------------+-----------------------------------+
+        |Version  |  Date         |  Comment                          |
+        +---------+---------------+-----------------------------------+
+        |0.1      |  28/May/2021  |  Initial draft                    |
+        +---------+---------------+-----------------------------------+
+
+                            Abstract
+                            --------
+        This document seeks propose a model for transactions based 
+        on the document 'some_thoughts_on_training.txt version 0.21'.
+
+
+                            References
+                            ----------
+
+        (a) https://www.ics.uci.edu/~fielding/pubs/dissertation/fielding_dissertation.pdf
+
+
+                            Section - I
+                            SCOPE
+                            -----------
+
+    (A) What do we want ?
+
+        The document 'some_thoughts_on_training.txt version 0.21'
+        presented a mechanism by which component interactions can
+        be captured and visualized for the purposes of training.
+
+        This document presents certain nuances relating to component 
+        interaction constrained to the scope of training. Visualization
+        is not covered here.
+
+
+    (B) What are we interested in ?
+
+        Restating 'some_thoughts_on_training.txt version 0.21':
+
+        (a) We are interested when 
+
+            (1) Two components interact through an interface. An interface
+                that is provided by one component and exercised by another.
+                Particularly when one component invokes a specific function 
+                of the interface of another.
+
+            (2) When a component 'announces' the occurance of an event to 
+                other 'subscribing' components (perhaps through an event bus).
+
+        (b) We are interested in the causality of interactions. i.e. which
+            interaction/event caused another interaction/event to occur 
+            (effect). As a generalization, we are interested in the causality
+            tree.
+
+
+    (C) What is the transactional model ?
+
+        The transactional model is a data model intended to capture component
+        interactions at a basic level.
+
+
+    (D) Who is the audience ?
+
+        (a) People who need an overview of components in amagi's broadcast 
+            solution.
+
+        (b) Operational L2 support.
+            It is not in the purview of this document to cover L3 support
+            that requires elaborate details of each interaction.
+
+
+
+
+
+
+
+        
+
+    
+
+
+
+
+
+
+
+

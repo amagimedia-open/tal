@@ -1,0 +1,453 @@
+
+                    SOME THOUGHTS ON TRAINING - I 
+                    =============================
+
+
+        +---------+---------------+-----------------------------------+
+        |Version  |  Date         |  Comment                          |
+        +---------+---------------+-----------------------------------+
+        |0.1      |  27/Apr/2021  |  Initial draft                    |
+        |         |               |                                   |
+        |0.2      |  01/May/2021  |  First draft of FCI-1             |
+        |         |               |  Added sections on                |
+        |         |               |  INTENT                           |
+        |         |               |  TRAINING                         |
+        |         |               |  COMPONENTS & INTERACTIONS        |
+        |         |               |  FCI-1 SPECIFICATION              |
+        |         |               |                                   |
+        |0.21     |  02/May/2021  |  Field values as URN's.           |
+        +---------+---------------+-----------------------------------+
+
+
+                            Abstract
+                            --------
+        This document proposes that run time logs can be used to provide
+        initial training for an audience consisting of L1/L2 operational 
+        staff and joinees.
+
+
+                            Section - I
+
+                              INTENT
+                            -----------
+
+    A. What the audience needs to know :
+
+        * The components in the system
+        * How they interact
+
+
+    B. What the audience does not need to know :
+
+        * Technologies used to build the components
+        * Technologies used for interaction between the components
+
+
+    C. The proposal :
+
+        We see that the system is built up of interacting components.
+
+        Each component has a well defined interface consisting of a set of
+        functions through which the component is used.
+
+        (a) If every function invocation of an components interface can be 
+            logged in a structured manner
+
+        (b) then it is possible to implement one or more filters that 
+            consume a log consisting (in part) of these invocations and 
+            responses to generate an intermediate format 
+
+        (c) that can further consumed by tools for visualization (both
+            graphical and textual).
+
+        (d) The benefits of such an approach are :
+
+            (1) No seperate documentation effort is needed
+            (2) Visualizations are in lockstep with development
+            (3) Training accomplished through these visualizations 
+                are far more comprehensible and direct.
+
+
+
+                            Section - II
+
+                              TRAINING
+                            -------------
+
+    A. What constitutes 'initial training' ?
+
+        In this document we propose a possible perspective, one that is 
+        is based on some points gleaned from Roy Fieldings thesis. 
+        These are 
+
+        (a) Software architecture focusses on interaction between elements 
+            and not their implementation.
+
+        (b) Software architecture is concerned about run time abstration
+            i.e. run time characteristics that are independent of 
+            implementation.
+
+        (c) Software architecture specifies how different phases
+            of the system function. The phases being 
+                * startup
+                * initialization
+                * normal processing
+                * re-initialization
+                * shutdown
+
+        (d) A software architecture description specifies
+                * operational behaviour of a phase
+                * transition between phases
+
+        (e) Software architectural elements are
+                * Components
+                * Connectors
+                * Data elements
+
+        (f) The behavior of each component is that which can be observed 
+            or discerned from the point of view of another component.
+
+        +----------------------------------------------------------------+
+        | The point (f) specifically is what we claim as important for   |
+        | 'initial training' as it                                       |
+        |                                                                |
+        |     (i)   Highlights various components of the system          |
+        |     (ii)  Provides a glimpse of how components interact        |
+        |           during various system phases.                        |
+        |                                                                |
+        | We hope that with this perspective the audience will be better |
+        | equipped to delve into more subtler aspects of the system.     |
+        +----------------------------------------------------------------+
+
+        The proposal expressed here focusses on Components and adjourns
+        treatment of Connectors and Data elements.
+
+
+    B. Visualization
+
+        Training material normally uses text/digrams to describe components 
+        and their behaviours. These behaviours are expected to be visualized
+        by the audience in their minds.
+
+        We intend to flip this training view by providing graphical 
+        visualizations of interation between components and use static 
+        documents for annotation purposes. It is expected that this approach 
+        would make a training session far more comprehensible and interesting.
+
+        Visualizations can occur in two forms
+            * Dynamic graphics
+            * Static images
+        Various tools like D3, React-vis, graphviz and formats such as
+        UML sequence diagrams exist to achieve visualizations.
+
+
+    C. Need for an intermediate format (IF)
+
+        This document does not propose any tool or format for visualization
+        as this might limit a creative person/team from expressing component
+        interactions in the way she/he/they might want them to be. Instead an 
+        intermediate format (IF) gleaned from logs to capture component 
+        interactions is presented in this document. This can later be used 
+        to construct visualizations.
+
+        +------+        +--------------+        +---------------+
+        | Logs | -----> | Intermediate | -----> | Visualization |
+        +------+        | Format       |        +---------------+
+                        +--------------+
+
+        The IF must
+
+            (a) aid in creation of comprehensible visualizations
+            (b) be simple and mimimal
+            (c) possess proper syntax and semantics
+            (d) be verifiable for
+                (i)  well formedness
+                (ii) completeness and consistency
+
+
+                            Section - III
+
+                             COMPONENTS & INTERACTIONS
+                            ---------------------------
+
+    The purpose of IF is to capture component interactions.
+    We shall thus components and their interactions in this section.
+
+    A. Component interface
+
+        Components expose their functionality through an interface.
+        Interfaces express what the component 'can do' as opposed to
+        'how it is done'.
+
+        Minimally an interface is composed of 
+
+        (1) functions that are points for a request-response sequence.
+
+        (2) event-sinks that are points for the consumption of events.
+            (i)  directly from another component (or)
+            (ii) through an event bus via a subscription mechanism
+
+
+                                    |
+                                    |
+                                    +------------------+
+                     request   |    |                  |
+                    ---------->| FX -                  |
+                    <----------|    |                  |
+                     response  |    |  Component       |
+                                    |  implementation  |
+                                    |                  |
+                      event    |    |                  |
+                    ---------->| ES -                  |
+        +-----------+          |    |                  |
+        | Event-Bus |--------->|    +--------------+---+
+        +-----------+ event         |              |
+              ^                   interface        |
+              |                                    |
+              +------------------------------------+
+                      subscribe
+
+
+    B. Component interactions
+
+        Components can interact in a variety of ways.
+        We consider two ways here.
+
+        (a) Direct request-response interaction.
+
+             +--------------+              +---------------+
+             |              |  request     |               |
+             |  Component-A |------------> FX Component-B  |
+             |              |<------------ |               |
+             +--------------+  response    +---------------+
+
+
+        (b) Direct or indirect propogation of events.
+
+            +--------------+        +--------------+        +---------------+
+            |              | event  |              | event  |               |
+            | Component-A  | -----> ES Component-B | -----> ES Component-C  |
+            |              |        |              |        |               |
+            +--------------+        +--------------+        +---------------+
+                   ^                                                 |
+                   |                event                            |
+                   +-------------------------------------------------+
+
+            Remember that events can also be received through an event bus.
+
+
+
+                            Section - IV
+
+                            FCI-1 SPECIFICATION
+                            --------------------
+
+    We propose to name the intermediate format as FCI-1 (A format for 
+    component interactions). The specification of FCI-1 is specified in 
+    this section.
+
+    A. FCI-1 fields
+
+        (a) Field values are expressed as URN's
+        (b) All fields other than sent-at and received-at must be resolved 
+            to an URI via a resolver. 
+            The resolved URI's typically contain static documentation that 
+            can be used for annotation purposes.
+            The resolved URI's for req-desc, resp-desc and ev-desc must
+            contain values pertinent to the request, response or event.
+
+        +---------------+----------------------------------------------------+
+        |  FIELD NAME   |  DESCRIPTION                                       |
+        +---------------+----------------------------------------------------+
+        |  activity     |  A request or response or event.                   |
+        |               |                                                    |
+        |               |  Syntax : urn:amagi:fci:request|response|event     |
+        +---------------+----------------------------------------------------+
+        |  requestor    |  A component that makes a request to another       |
+        |               |  component and expects a response from it.         |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:requestor:               |
+        |               |             {sub-system-name}:{component-name}     |
+        |               |  Semantic : Must uniquely identify a component.    |
+        |               |             Resolved URI must contain static       |
+        |               |             documentation about the component.     |
+        +---------------+----------------------------------------------------+
+        |  responder    |  A component that receives a request from another  |
+        |               |  component and supplies a response to it.          |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:responder:               |
+        |               |             {sub-system-name}:{component-name}     |
+        |               |  Semantic : Must uniquely identify a component.    |
+        |               |             Resolved URI must contain static       |
+        |               |             documentation about the component.     |
+        +---------------+----------------------------------------------------+
+        |  event-source |  A component that emits an event.                  |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:ev-source:               |
+        |               |             {sub-system-name}:{component-name}     |
+        |               |  Semantic : Must uniquely identify a component.    |
+        |               |             Resolved URI must contain static       |
+        |               |             documentation about the component.     |
+        |               |  Example  : TODO                                   |
+        +---------------+----------------------------------------------------+
+        |  event-sink   |  A component that consumes an event.               |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:ev-sink:                 |
+        |               |             {sub-system-name}:{component-name}     |
+        |               |  Semantic : Must uniquely identify a component.    |
+        |               |             Resolved URI must contain static       |
+        |               |             documentation about the component.     |
+        +---------------+----------------------------------------------------+
+        |  tx-id        |  A transaction identifier that uniquely labels a   |
+        |               |  request-response interaction or an event emission.|
+        |               |  This is mechanism by which requests, responses    |
+        |               |  and events are correlated.                        |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:tx-id:{id}               |
+        |               |  Semantic : must uniquely identify a transaction.  |
+        |               |             a request-response sequence is         |
+        |               |             a transaction.                         |
+        |               |             an event-emission and its reception is |
+        |               |             a transaction.                         |
+        +---------------+----------------------------------------------------+
+        |  parent-tx-id |  Indicates a cause-effect chain. The parent-tx-id  |
+        |               |  being the cause and the tx-id being the effect.   |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:parent-tx-id:{id}        |
+        |               |  Semantic : must be unique or an earlier occuring  |
+        |               |             tx-id                                  |
+        +---------------+----------------------------------------------------+
+        |  sent-at      |  Date time at which a request/response/event is    |
+        |               |  dispatched.                                       |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:sent-at:{ISO 8601 UTC}   |
+        |               |             https://en.wikipedia.org/wiki/ISO_8601 |
+        |               |             #Coordinated_Universal_Time_(UTC)      |
+        +---------------+----------------------------------------------------+
+        |  received-at  |  Date time at which a request/response/event is    |
+        |               |  received.                                         |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:sent-at:{ISO 8601 UTC}   |
+        +---------------+----------------------------------------------------+
+        |  if-fnx-name  |  Interface function name.                          |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:fnx:                     |
+        |               |             {interface-name}:{function-name}       |
+        |               |  Semantic : Resolved URI must contain static       |
+        |               |             documentation about the component.     |
+        +---------------+----------------------------------------------------+
+        |  event-name   |  Event name.                                       |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:ev:{event-name}          |
+        |               |  Semantic : Resolved URI must contain static       |
+        |               |             documentation about the component.     |
+        +---------------+----------------------------------------------------+
+        |  req-desc     |  Description about a request. Typically expressed  |
+        |               |  through a parameter list or a set of properties.  |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:req-desc:{id}            |
+        |               |  Semantic : Must identify a resource that contains |
+        |               |             {name=value}+ information              |
+        +---------------+----------------------------------------------------+
+        |  resp-desc    |  Description about a response. Typically expressed |
+        |               |  through a parameter list or a set of properties.  |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:resp-desc:{id}           |
+        |               |  Semantic : Must identify a resource that contains |
+        |               |             {name=value}+ information              |
+        +---------------+----------------------------------------------------+
+        |  ev-desc      |  Description about an event. Typically expressed   |
+        |               |  through a set of properties.                      |
+        |               |                                                    |
+        |               |  Syntax   : urn:amagi:fci:ev-desc:{id}             |
+        |               |  Semantic : Must identify a resource that contains |
+        |               |             {name=value}+ information              |
+        +---------------+----------------------------------------------------+
+
+
+    C. Cascading
+
+        Cascading of requests/response and events are possible.
+
+        (i)  A responder could be the requestor of another request (may be in 
+             order to supply a response to its requestor).
+        (ii) An event-sink can propogate the event or emit a new event by 
+             becoming a 'new' event-source.
+
+
+    C. FCI-1 instance
+
+        (a) An FCI-1 instance is a collection of records.
+
+        (b) Each record consists of one or more fields as field_name={value}
+
+            (i)   A field name can occur at most once in a record.
+            (ii)  Field names are mandatory, optional or prohibited based 
+                  on the value of the activity field.
+            (iii) There can be one or two records for the same interaction
+                  one - either at the sending or receiving end
+                  two - both at the sending and receiving ends
+
+
+    D.  Constraints on fields
+
+        M - Mandatory
+        O - Optional
+        X - Prohibited
+
+        +--------------+-------------------------+-------------------------+
+        |              |   activity = request    |   activity = response   |
+        |              +------------+------------+------------+------------+
+        | FIELD        | @requestor | @responder | @responder | @requestor |
+        +--------------+------------+------------+------------+------------+
+        | requestor    |     M      |     O      |     O      |     M      |
+        | responder    |     O      |     M      |     M      |     O      |
+        | event-source |     X      |     X      |     X      |     X      |
+        | event-sink   |     X      |     X      |     X      |     X      |
+        | tx-id        |     M      |     M      |     M      |     M      |
+        | parent-tx-id |     O      |     O      |     O      |     O      |
+        | sent-at      |     M      |     O      |     M      |     O      |
+        | received-at  |     X      |     M      |     X      |     M      |
+        | if-fnx-name  |     M      |     M      |     M      |     M      |
+        | event-name   |     X      |     X      |     X      |     X      |
+        | req-desc     |     O      |     O      |     X      |     X      |
+        | resp-desc    |     X      |     X      |     O      |     O      |
+        | ev-desc      |     X      |     X      |     X      |     X      |
+        +--------------+------------+------------+------------+------------+
+
+        +--------------+------------------------------+
+        |              |      activity = event        |
+        |              +---------------+--------------+
+        | FIELD        | @event-source | @event-sink  |
+        +--------------+---------------+--------------+
+        | requestor    |      X        |      X       |
+        | responder    |      X        |      X       |
+        | event-source |      M        |      O       |
+        | event-sink   |      O        |      M       |
+        | tx-id        |      M        |      M       |
+        | parent-tx-id |      O        |      O       |
+        | sent-at      |      M        |      O       |
+        | received-at  |      X        |      M       |
+        | if-fnx-name  |      X        |      X       |
+        | event-name   |      M        |      M       |
+        | req-desc     |      X        |      X       |
+        | resp-desc    |      X        |      X       |
+        | ev-desc      |      O        |      O       |
+        +--------------+---------------+--------------+
+
+
+    E. Notes
+        
+        (a) We claim that the FCI-1 specification is sufficient to represent
+            all component interactions in the system and will lead to 
+            comprehensible visualizations.
+
+        (b) It is hoped that the 'informational content' present in log 
+            lines is sufficient enough to create FCI-1 records. If not log 
+            lines need to be appropriately modified.
+
+        (c) Any widely used format such as json or xml can be used to 
+            represent FCI-1 instances.
+
+
+                                    -x-
