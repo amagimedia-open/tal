@@ -1,5 +1,4 @@
 Transaction (L2), Data (L3)
-
 uuid
     - for component instances
         - phases: 
@@ -13,10 +12,9 @@ uuid
     - for transaction instances (at INFO level)
     - same uuid used in DEBUG statements that
       contains data model details
-
 Transaction data model
-
 Enumeration of component names and function points
+Versioning
 
 
                         LOG TRANSACTION MODEL
@@ -39,9 +37,11 @@ Enumeration of component names and function points
         (a) https://www.ics.uci.edu/~fielding/pubs/dissertation/fielding_dissertation.pdf
 
 
-                            Section - I
-                            SCOPE
-                            -----------
+                        +-------------+
+                        | Section - I |
+                        |    SCOPE    |
+                        +-------------+
+
 
     (A) What do we want ?
 
@@ -49,9 +49,9 @@ Enumeration of component names and function points
         presented a mechanism by which component interactions can
         be captured and visualized for the purposes of training.
 
-        This document presents certain nuances relating to component 
-        interaction constrained to the scope of training. Visualization
-        is not covered here.
+        This document extends this by presenting certain nuances 
+        relating to component interactions (constrained to the scope 
+        of training). Visualization is not covered here.
 
 
     (B) What are we interested in ?
@@ -66,11 +66,12 @@ Enumeration of component names and function points
                 of the interface of another.
 
             (2) When a component 'announces' the occurance of an event to 
-                other 'subscribing' components (perhaps through an event bus).
+                other 'subscribing' component(s) (perhaps through an event 
+                bus).
 
         (b) We are interested in the causality of interactions. i.e. which
-            interaction/event caused another interaction/event to occur 
-            (effect). As a generalization, we are interested in the causality
+            interaction/event caused another interaction/event to occur as
+            an effect. As a generalization, we are interested in the causality
             tree.
 
 
@@ -82,27 +83,135 @@ Enumeration of component names and function points
 
     (D) Who is the audience ?
 
-        (a) People who need an overview of components in amagi's broadcast 
-            solution.
+        (a) People who need an overview about components present in amagi's 
+            broadcast solution.
 
         (b) Operational L2 support.
-            It is not in the purview of this document to cover L3 support
-            that requires elaborate details of each interaction.
+            This document does not cover L3 support that requires elaborate 
+            details of each interaction.
 
 
+                        +----------------+
+                        | Section - II   |
+                        | CONSIDERATIONS |
+                        +----------------+
 
 
+    In this section we will present the considerations that lead to 
+    the definition of the transactional model.
+
+    (A) What constitutes and interaction (transaction) ?
+
+        (a) In a request-response scenario it is
+
+            (1) The requestor component name
+            (2) The responder component name
+            (3) The function name (belonging to a specific interface)
+            (4) An unique id that identifies the request
+            (5) A 'parent' id that caused this request.
+
+            Note that details of the function such as its parameters
+            are not covered in this document.
+
+        (b) In a event 'broadcast' model it is
+
+            (1) The event-source component name
+            (2) One or more event-sink component name(s)
+            (3) The event name
+            (4) An unique id that identifies the emission of the event
+            (5) An 'parent' id that identifies the cause of emission of 
+                the event
+
+            Note that details of the event such as its attributes
+            are not covered in this document.
+
+    (B) Component name
+
+        (a) Components take on one of the following roles for a given 
+            interaction
+            (1) requestor
+            (2) responder
+            (3) event-source 
+            (4) event-sink
+
+        (b) Component names must be unique that we may 
+            (1) differentiate them from one another
+            (2) differentiate between possibly multiple instances of
+                the same component that are concurrently running
+                on the same or different machines
+            (3) differentiate between a newly created instance or
+                a restored instance.
 
 
+    (C) Function and event names
 
-        
+        (a) Every function name must be unique in a given interface.
+            This assumes that every interface name must be unique.
 
-    
+        (b) Every event name must be unique.
+
+        (c) As far as the model is concerned, it is not necessary to
+            elucidate the actual function parameters of event attributes
+            during an interaction.
 
 
+    (D) Transaction identification
+
+        (a) Every transaction must be uniquely identifiable.
+
+        (b) A request and the corresponding response must possess the 
+            same id.
+
+        (c) Every transaction MUST have a causal/parent transaction.
+            The only exceptions to this are
+            (1) a request/event issued on a timer expiry 
+            (2) a user initiated action
 
 
+    (E) Versioning
+
+        (a) The version of the model must be identifiable.
+
+        (b) The versions of components/functions/events must
+            be identifiable.
 
 
+                        +---------------+
+                        | Section - III |
+                        | DEFINITIONS   |
+                        +---------------+
 
 
+    (A) INSTANCES
+
+        TODO
+
+
+    (B) UID
+
+        Unique ID. This could be a UUID, SHA-* hash, a running counter 
+        within a namespace, etc..
+        An UID is expected to be unique for a time duration that allows 
+        for debugging of field issues. A period of at least 6 months if 
+        not eternity.
+
+        An UID
+
+        (a) can be an opaque identifier to refer to a set of attributes 
+            (typically name=value pairs) of an object.
+            eg: 1622298779 referring to 
+                {name={name}, started_at={datetime}..., ...)
+
+        (b) can be a transparent identified that encodes the attributes
+            in the UID itself.
+            eg: {name}-1780198901-{datetime}
+
+        (c) a combination of (a) and (b)
+            eg: {name}-1780198901 refering to 
+                {name={name}, started_at={datetime}..., ...)
+
+
+                        +---------------+
+                        | Section - III |
+                        | THE MODEL     |
+                        +---------------+
