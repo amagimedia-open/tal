@@ -317,9 +317,11 @@ Versioning
 
         Every transaction can be uniquely identified through
 
-        {TXId}
+        TXM/{TXMVer}/{TXId}
 
         where
+            * 'TXM' is a keyword for 'Transaction Model'.
+
             * {TXId} is an {STRNW} referring to a semantically related
               set of events.
 
@@ -345,24 +347,26 @@ Versioning
             PARENTTXID={TXId}
                 Indentifying the parent/causal transaction
 
+            FNXID={IFId}/{IFVer}/{FNXId}
+                Identifying the function
+
             ACT={request|response}
                 The activity
 
-            REQCOMPID={CompId}/{CompUID}
-                The requesting component id
+            LOC={src|dest}
+                src  => logged at requesting component end
+                dest => logged at responding component end
 
-            RESPCOMPID={CompId}/{CompUID}
-                The responding component id
+            COMPID={CompId}/{CompUID}
+                The component id (see LOC)
 
-            FNXID={IFId}/{IFVer}/{FNXId}
-                Identifying the function
 
         (c) The above tuple MUST occur as a log line 
 
             Every time a interface function invocation is made across 
             components.
 
-        (c) In the case of a event emissions, the {TXId} refers to a 
+        (d) In the case of a event emissions, the {TXId} refers to a 
             tuple consisting of name=value pairs:
 
             TXID={TXId}
@@ -370,12 +374,18 @@ Versioning
             PARENTTXID={TXId}
                 Indentifying the parent/causal transaction
 
-            ACT='event'
-
             EVID={EVClassId}/{EVClassVer}/{EVId}
                 Identifying the event
 
-        (d) The above tuple MUST occur as a log line 
+            ACT='event'
+
+            LOC={src|dest}
+                src  => logged at component that published the event
+                dest => logged at component that consumed the event
+
+            COMPID={CompId}/{CompUID}
+
+        (e) The above tuple MUST occur as a log line 
 
             Every time an event is published across components.
             
