@@ -80,6 +80,10 @@ Versioning
         The transactional model is a data model intended to capture component
         interactions at a basic level.
 
+        This model concerns itself with components and invocation-points.
+        This model is not concerned about the data associated with transactions
+        or the connectors through which these transactions are achieved.
+
 
     (D) Who is the audience ?
 
@@ -100,7 +104,7 @@ Versioning
     In this section we will present the considerations that lead to 
     the definition of the transactional model.
 
-    (A) What constitutes and interaction (transaction) ?
+    (A) What constitutes a transaction (interaction) ?
 
         (a) In a request-response scenario it is
 
@@ -151,29 +155,50 @@ Versioning
         (b) Every event name must be unique.
 
         (c) As far as the model is concerned, it is not necessary to
-            elucidate the actual function parameters of event attributes
+            elucidate the actual function parameters and event attributes
             during an interaction.
-
 
     (D) Interaction/Transaction identification
 
         (a) Every transaction must be uniquely identifiable.
 
         (b) A request and the corresponding response must possess the 
-            same id.
+            same identification.
 
         (c) Every transaction MUST have a causal/parent transaction.
             The only exceptions to this are
             (1) a request/event issued on a timer expiry 
             (2) a user initiated action
-
+            TODO
 
     (E) Versioning
 
-        (a) The version of the model must be identifiable.
+        (a) The version of the transaction model must be identifiable.
 
         (b) The versions of components/functions/events must
             be identifiable.
+
+
+    (F) Logging asymmetry
+
+        The details pertaining to identification of a component, function 
+        or events will differ based on the location of logging.
+
+        For example during a interface/function invocation the requestor
+        may just have information to specify interface-name/function-name
+        whereas the responder may have additional pieces of information to
+        specify interface-name/interface-version/function-name.
+
+        Another example during a interface/function invocation is the 
+        specification of the responder name at the requestors end. This
+        would be as simple as responder-component-name. At the responders
+        end this would be responder-component-name/UID which would in turn
+        refer to more details about the component (dealt in 
+        MODEL/Identifying components later on).
+
+        The critical piece of information that connects the logs at 
+        different locations is the transaction itself which would have an
+        identical representation at both ends.
 
 
                         +---------------+
@@ -207,7 +232,7 @@ Versioning
         for debugging of field issues. A period of at least 6 months if 
         not eternity.
 
-        An UID
+        An UID can be one of the following
 
         (a) Plain-UID
             this is an opaque identifier referring to a set of attributes 
@@ -237,25 +262,30 @@ Versioning
                         | THE MODEL     |
                         +---------------+
 
-
     (A) Identifying components
 
-        (a) Every component can be uniquely identified through an {Comb-UID}
-            of the form {CompId}/{CompUID}
+        (a) Every component can be uniquely identified through an Comb-UID
+            of the form COMP/{CompId}/{CompUID}
 
             where 
+                * 'COMP' is a keyword 
+
                 * {CompId} is an {STRNW} referring to the component name.
 
                 * {CompUID} is an {UID} referring to an unique instance 
                   of the component.
 
-        (b) This refers to a tuple consisting of name=value pairs:
+            example
+
+                COMP/CPPLY/1622363525
+
+        (b) This Comb-UID refers to a tuple consisting of name=value pairs:
 
             COMPID={CompId}
 
             COMPUID={CompUID}
 
-            COMPID={CompId}/{CompUID}
+            COMPREF=COMP/{CompId}/{CompUID}
 
             COMPDESC={description of the component}
                 eg: "Cloudport Media Player"
@@ -267,50 +297,72 @@ Versioning
             COMPSTATE={startup|initialization|running|restored|shutdown}
                 startup     : component has just been loaded
                 initialized : component has been configured
-                running     : component is now running normally
-                restored    : component started with previous state after a 
-                              crash
+                running     : component is now running
+                restarted   : component started with previous state after a 
+                              crash. In this case the {CompUID} must take
+                              on a new value
                 shutdown    : component has been shutdown
 
-            COMPVERSION={version}
-                The software version of the component
+            COMPVER={version}
+                indentifies the software version of the component
 
-        (c) The above tuple MUST occur as a log line 
+        (c) The component MUST generate a log line
 
             (1) Every time there is a state change to the component
-                See State values in (b)
+                (See COMPSTATE above).
             (2) As a carousel, minimally once every n-minutes
+
+        (d) A reference to a remote component must be of the form
+            COMP/{CompId}/-
 
 
     (B) Identifying functions
 
-        Every function can be uniquely identified through
+        (a) Every function can be uniquely identified through
 
-        {IFId}/{IFVer}/{FNXId}
+            FNX/{IFId}/{IFVer}/{FNXId}
 
-        where
-            * {IFId} is an {STRNW} referring to the interface name.
+            where
+                * 'FNX' is a keyword 
 
-            * {IFVer} is a {version} referring to the software version
-              of the interface.
+                * {IFId} is an {STRNW} referring to the interface name.
 
-            * {FNXId} is an {STRNW} referring to the function name.
+                * {IFVer} is a {version} referring to the software version
+                  of the interface.
+
+                * {FNXId} is an {STRNW} referring to the function name.
+
+            example
+
+                FNX/CPPLY/3.0/PLAY
+
+        (b) A reference to a remote function must be of the form
+            FNX/{IFId}/-/{FNXId}
 
 
     (C) Identifying events
 
-        Every event can be uniquely identified through
+        (a) Every event can be uniquely identified through
 
-        {EVClassId}/{EVClassVer}/{EVId}
+            EV/{EVClassId}/{EVClassVer}/{EVId}
 
-        where
-            * {EVClassId} is an {STRNW} referring to a semantically related
-              set of events.
+            where
+                * 'EV' is a keyword 
 
-            * {EVClassVer} is a {version} referring to the software version
-              of the {EVClassId}.
+                * {EVClassId} is an {STRNW} referring to a semantically related
+                  set of events.
 
-            * {EVId} is an {STRNW} referring to the event name.
+                * {EVClassVer} is a {version} referring to the software version
+                  of the {EVClassId}.
+
+                * {EVId} is an {STRNW} referring to the event name.
+
+            example
+
+                EV/CPLIVEOP/2.0/ENTERBREAK
+
+        (b) A reference to a remote event must be of the form
+            EV/{EVClassId}/-/{EVId}
 
 
     (D) Identifying transactions
@@ -327,55 +379,82 @@ Versioning
 
             * {TXId} is an {ANSNW} referring to a transaction instance.
 
+        (a) Function invocation
 
-        (a) In the case of a function invocation, the transaction refers 
-            to a tuple consisting of name=value pairs:
+            (1) In this case the transaction refers to a tuple consisting 
+                of the following name=value pairs:
 
-            TXID=TXM/{TXMVer}/{TXId}
+                TXREF=TXM/{TXMVer}/C/{TXId}
+                    Indentifying the current transaction
 
-            PARENTTXID={TXId}
-                Indentifying the parent/causal transaction
+                PARENTTXREF=TXM/{TXMVer}/P/{TXId}
+                    Indentifying the parent/causal transaction
 
-            FNXID={IFId}/{IFVer}/{FNXId}
-                Identifying the function
+                FNXREF=FNX/{IFId}/{IFVer|-}/{FNXId}
+                    Identifying the function
+                    FNX/{IFId}/{-}/{FNXId} at the requestor and
+                    FNX/{IFId}/{IFVer}/{FNXId} at the responder
 
-            ACT={request|response}
-                Activity : A request or a response
+                ACT={request|response}
+                    Activity : A request or a response
 
-            LOC={src|dest}
-                src  => logged at requesting component end
-                dest => logged at responding component end
+                LOGLOC={req|resp}
+                    req  => logged at requesting component end
+                    resp => logged at responding component end
 
-            COMPID={CompId}/{CompUID}
-                The component id (see LOC)
+                COMPREF=COMP/{CompId}/{CompUID}
+                    Identifying the component 
 
-        (b) The above tuple MUST occur as a log line 
+            (2) The above tuple MUST occur as a log line 
 
-            Every time a interface function invocation is made across 
-            components.
+                At both the requestor and responder component ends
+                every time a interface function invocation (request or
+                response) is made.
 
-        (d) In the case of a event emissions, the transaction refers
-            to a tuple consisting of name=value pairs:
+            (3) The values of TXREF and PARENTTXREF must be piggybacked
+                with function parameters as metadata.
 
-            TXID=TXM/{TXMVer}/{TXId}
+        (b) Event publish
 
-            PARENTTXID={TXId}
-                Indentifying the parent/causal transaction
+            (1) In the case of the publish of an event, the transaction refers
+                to a tuple consisting of name=value pairs:
 
-            EVID={EVClassId}/{EVClassVer}/{EVId}
-                Identifying the event
+                TXREF=TXM/{TXMVer}/C/{TXId}
+                    Indentifying the current transaction
 
-            ACT='event'
+                PARENTTXREF=TXM/{TXMVer}/P/{TXId}
+                    Indentifying the parent/causal transaction
 
-            LOC={src|dest}
-                src  => logged at component that published the event
-                dest => logged at component that consumed the event
+                FNXID=FNX/{IFId}/{IFVer|-}/{FNXId}
+                    Identifying the function
+                    FNX/{IFId}/{-}/{FNXId} at the requestor and
+                    FNX/{IFId}/{IFVer}/{FNXId} at the responder
 
-            COMPID={CompId}/{CompUID}
-                The component id (see LOC)
+                EVREF=EV/{EVClassId}/{EVClassVer|-}/{EVId}
+                    Identifying the event
+                    EV/{EVClassId}/{EVClassVer}/{EVId} at the publisher and
+                    EV/{EVClassId}/-/{EVId} at the consumer
 
-        (e) The above tuple MUST occur as a log line 
+                ACT='event'
 
-            Every time an event is published across components.
-            
+                LOC={src|dest}
+                    src  => logged at component that published the event
+                    dest => logged at component that consumed the event
+
+                COMPREF={CompId}/{CompUID}
+                    Identifying the component 
+
+            (2) The above tuple MUST occur as a log line 
+
+                Every time an event is published or consumed.
+
+            (3) The values of TXREF and PARENTTXREF must be piggybacked
+                with event attributes as metadata.
+
+
+                        +--------------+
+                        | Section - IV |
+                        | NOTES        |
+                        +--------------+
+
 
