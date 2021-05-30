@@ -322,27 +322,16 @@ Versioning
         where
             * 'TXM' is a keyword for 'Transaction Model'.
 
-            * {TXId} is an {STRNW} referring to a semantically related
-              set of events.
+            * {TXMVer} is a {version} identification the version of this
+              specification.
 
-            * {EVClassVer} is a {version} referring to the software version
-              of the {EVClassId}.
+            * {TXId} is an {ANSNW} referring to a transaction instance.
 
-            * {EVId} is an {STRNW} referring to the event name.
-            
 
-    (E) Identifying transactions
+        (a) In the case of a function invocation, the transaction refers 
+            to a tuple consisting of name=value pairs:
 
-        (a) Every transaction be uniquely identified through a {Plain-UID}
-            of the form {TXId}
-
-            where 
-                * {TXId} is an {ANSNW} referring to a transaction instance.
-
-        (b) In the case of a function invocation, the {TXId} refers to a 
-            tuple consisting of name=value pairs:
-
-            TXID={TXId}
+            TXID=TXM/{TXMVer}/{TXId}
 
             PARENTTXID={TXId}
                 Indentifying the parent/causal transaction
@@ -351,7 +340,7 @@ Versioning
                 Identifying the function
 
             ACT={request|response}
-                The activity
+                Activity : A request or a response
 
             LOC={src|dest}
                 src  => logged at requesting component end
@@ -360,16 +349,15 @@ Versioning
             COMPID={CompId}/{CompUID}
                 The component id (see LOC)
 
-
-        (c) The above tuple MUST occur as a log line 
+        (b) The above tuple MUST occur as a log line 
 
             Every time a interface function invocation is made across 
             components.
 
-        (d) In the case of a event emissions, the {TXId} refers to a 
-            tuple consisting of name=value pairs:
+        (d) In the case of a event emissions, the transaction refers
+            to a tuple consisting of name=value pairs:
 
-            TXID={TXId}
+            TXID=TXM/{TXMVer}/{TXId}
 
             PARENTTXID={TXId}
                 Indentifying the parent/causal transaction
@@ -384,6 +372,7 @@ Versioning
                 dest => logged at component that consumed the event
 
             COMPID={CompId}/{CompUID}
+                The component id (see LOC)
 
         (e) The above tuple MUST occur as a log line 
 
