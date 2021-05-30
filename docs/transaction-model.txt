@@ -184,8 +184,20 @@ Versioning
 
     (A) INSTANCES
 
-        TODO
+        Instance : a single occurance of something 
 
+        That something/object can be a 
+            * Component
+            * Interaction/Transaction
+                * Function request
+                * Event emission
+
+        There can be
+            * Multiple running instances of the same component
+            * Multiple instances of invocation of the same interface-function.
+            * Multiple instances of the emission of the same event.
+
+        Clarity arises when each instance can be addressed uniquely.
 
     (B) UID
 
@@ -197,17 +209,20 @@ Versioning
 
         An UID
 
-        (a) can be an opaque identifier to refer to a set of attributes 
+        (a) Plain-UID
+            this is an opaque identifier referring to a set of attributes 
             (typically name=value pairs) of an object.
             eg: 1622298779 referring to 
                 {name={name}, started_at={datetime}..., ...)
 
-        (b) can be a transparent identified that encodes the attributes
-            in the UID itself.
+
+        (b) Desc-UID (Descriptive UID)
+            encodes the attributes in the UID itself.
             eg: {name}-1780198901-{datetime}
 
-        (c) a combination of (a) and (b)
-            eg: {name}-1780198901 refering to 
+        (c) Comb-UID (Combination UID)
+            is a combination of (a) and (b)
+            eg: {name}-1780195567 refering to 
                 {name={name}, started_at={datetime}..., ...)
 
 
@@ -215,3 +230,53 @@ Versioning
                         | Section - III |
                         | THE MODEL     |
                         +---------------+
+
+
+
+    (A) Addressing components
+
+        (a) A component is addressed using a Comb-UID consisting of {Id}-{UID}
+
+            Where {Id} is a five letter code assigned to each component
+            eg: CMPLY
+
+            {UID} refers to the unique instance of the component.
+
+        (b) This Comb-UID refers to a tuple consisting of name=value pairs:
+            
+            Id={Id}
+
+            UID={UID}
+
+            Description={description of the component}
+                eg: "Cloudport Media Player"
+
+            StartedAt={iso-8601-utc-with-milliseconds}
+                see: https://en.wikipedia.org/wiki/ISO_8601#Coordinated_Universal_Time_(UTC)
+                see: https://stackoverflow.com/a/50570660/1029379
+
+            State={startup|initialization|running|restored|shutdown}
+                startup     : component has just been loaded
+                initialized : component has been configured
+                running     : component is now running normally
+                restored    : component started with previous state after a 
+                              crash
+                shutdown    : component has been shutdown
+
+            Version={version}
+                The software version of the component
+
+        (c) The above tuple MUST occur as a log line 
+
+            (1) Every time there is a state change to the component
+                See State values in (b)
+            (2) As a carousel, minimally once every n-minutes
+
+
+
+
+             
+
+
+
+             
