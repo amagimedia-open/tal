@@ -1,23 +1,5 @@
-Transaction (L2), Data (L3)
-uuid
-    - for component instances
-        - phases: 
-            Configuration
-            Initialization      
-            Running
-            Restart     - new uuid
-            Shutdown
-        - carousel
-        - coded prefix (3/4 characters)
-    - for transaction instances (at INFO level)
-    - same uuid used in DEBUG statements that
-      contains data model details
-Transaction data model
-Enumeration of component names and function points
-Versioning
 
-
-                        LOG TRANSACTION MODEL
+                    TRANSACTIONAL LOGGING MODEL
 
         +---------+---------------+-----------------------------------+
         |Version  |  Date         |  Comment                          |
@@ -255,6 +237,10 @@ Versioning
         {a|b|c} : one of 'a', 'b' or 'c'
         STRNW   : Camel-case string with no white-spaces
         ANSNW   : Alpha numeric string with no white-spaces
+        
+        Component, function, event and transaction references are 
+        prefixed with COMP, FNX, EV, TXM to indicate different
+        namespaces.
 
 
                         +---------------+
@@ -362,7 +348,8 @@ Versioning
                 EV/CPLIVEOP/2.0/ENTERBREAK
 
         (b) A reference to a remote event must be of the form
-            EV/{EVClassId}/-/{EVId}
+            EV/{EVClassId}/-/{EVId} or 
+            EV/-/-/{EVId} if {EVId} is globally unique
 
 
     (D) Identifying transactions
@@ -425,15 +412,12 @@ Versioning
                 PARENTTXREF=TXM/{TXMVer}/P/{TXId}
                     Indentifying the parent/causal transaction
 
-                FNXID=FNX/{IFId}/{IFVer|-}/{FNXId}
-                    Identifying the function
-                    FNX/{IFId}/{-}/{FNXId} at the requestor and
-                    FNX/{IFId}/{IFVer}/{FNXId} at the responder
-
                 EVREF=EV/{EVClassId}/{EVClassVer|-}/{EVId}
                     Identifying the event
                     EV/{EVClassId}/{EVClassVer}/{EVId} at the publisher and
-                    EV/{EVClassId}/-/{EVId} at the consumer
+                    EV/{EVClassId}/-/{EVId} at the consumer or
+                    EV/-/-/{EVId} at the consumer if {EVId} is globally 
+                    unique
 
                 ACT='event'
 
@@ -441,7 +425,7 @@ Versioning
                     src  => logged at component that published the event
                     dest => logged at component that consumed the event
 
-                COMPREF={CompId}/{CompUID}
+                COMPREF=COMP/{CompId}/{CompUID}
                     Identifying the component 
 
             (2) The above tuple MUST occur as a log line 
@@ -457,4 +441,27 @@ Versioning
                         | NOTES        |
                         +--------------+
 
+
+    (A) Operational perspective
+
+        (a) Transaction logging at INFO level could be very useful at L2.
+        (b) DEBUG log lines containing data elements with TXREF's could be 
+            very useful at L3.
+        (c) TXREF's could be yet another mechanism by which L2 can 
+            communicate with L3.
+
+    (B) Names
+
+        If needed codes like those used in India Railways can be used
+        for names of components, interfaces, functions and events.
+
+
+                        +-------------+
+                        | Section - V |
+                        | EXAMPLES    |
+                        +--------------+
+
+                            TODO
+
+                            -x-
 
