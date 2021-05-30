@@ -155,7 +155,7 @@ Versioning
             during an interaction.
 
 
-    (D) Transaction identification
+    (D) Interaction/Transaction identification
 
         (a) Every transaction must be uniquely identifiable.
 
@@ -197,7 +197,7 @@ Versioning
             * Multiple instances of invocation of the same interface-function.
             * Multiple instances of the emission of the same event.
 
-        Clarity arises when each instance can be addressed uniquely.
+        Clarity arises when each instance can be identified uniquely.
 
     (B) UID
 
@@ -215,15 +215,21 @@ Versioning
             eg: 1622298779 referring to 
                 {name={name}, started_at={datetime}..., ...)
 
-
         (b) Desc-UID (Descriptive UID)
             encodes the attributes in the UID itself.
             eg: {name}-1780198901-{datetime}
 
         (c) Comb-UID (Combination UID)
             is a combination of (a) and (b)
-            eg: {name}-1780195567 refering to 
+            eg: {name}/1780195567 refering to 
                 {name={name}, started_at={datetime}..., ...)
+
+    (C) Notations/Terms
+
+        {xxx}   : refers to a value of the type xxx
+        {a|b|c} : one of 'a', 'b' or 'c'
+        STRNW   : Camel-case string with no white-spaces
+        ANSNW   : Alpha numeric string with no white-spaces
 
 
                         +---------------+
@@ -232,30 +238,33 @@ Versioning
                         +---------------+
 
 
+    (A) Identifying components
 
-    (A) Addressing components
+        (a) Every component can be uniquely identified through an {Comb-UID}
+            of the form {CompId}/{CompUID}
 
-        (a) A component is addressed using a Comb-UID consisting of {Id}-{UID}
+            where 
+                * {CompId} is an {STRNW} referring to the component name.
 
-            Where {Id} is a five letter code assigned to each component
-            eg: CMPLY
+                * {CompUID} is an {UID} referring to an unique instance 
+                  of the component.
 
-            {UID} refers to the unique instance of the component.
+        (b) This refers to a tuple consisting of name=value pairs:
 
-        (b) This Comb-UID refers to a tuple consisting of name=value pairs:
-            
-            Id={Id}
+            COMPID={CompId}
 
-            UID={UID}
+            COMPUID={CompUID}
 
-            Description={description of the component}
+            COMPID={CompId}/{CompUID}
+
+            COMPDESC={description of the component}
                 eg: "Cloudport Media Player"
 
-            StartedAt={iso-8601-utc-with-milliseconds}
+            COMPSTARTEDAT={iso-8601-utc-with-milliseconds}
                 see: https://en.wikipedia.org/wiki/ISO_8601#Coordinated_Universal_Time_(UTC)
                 see: https://stackoverflow.com/a/50570660/1029379
 
-            State={startup|initialization|running|restored|shutdown}
+            COMPSTATE={startup|initialization|running|restored|shutdown}
                 startup     : component has just been loaded
                 initialized : component has been configured
                 running     : component is now running normally
@@ -263,7 +272,7 @@ Versioning
                               crash
                 shutdown    : component has been shutdown
 
-            Version={version}
+            COMPVERSION={version}
                 The software version of the component
 
         (c) The above tuple MUST occur as a log line 
@@ -273,10 +282,101 @@ Versioning
             (2) As a carousel, minimally once every n-minutes
 
 
+    (B) Identifying functions
+
+        Every function can be uniquely identified through
+
+        {IFId}/{IFVer}/{FNXId}
+
+        where
+            * {IFId} is an {STRNW} referring to the interface name.
+
+            * {IFVer} is a {version} referring to the software version
+              of the interface.
+
+            * {FNXId} is an {STRNW} referring to the function name.
 
 
-             
+    (C) Identifying events
+
+        Every event can be uniquely identified through
+
+        {EVClassId}/{EVClassVer}/{EVId}
+
+        where
+            * {EVClassId} is an {STRNW} referring to a semantically related
+              set of events.
+
+            * {EVClassVer} is a {version} referring to the software version
+              of the {EVClassId}.
+
+            * {EVId} is an {STRNW} referring to the event name.
 
 
+    (D) Identifying transactions
 
-             
+        Every transaction can be uniquely identified through
+
+        {TXId}
+
+        where
+            * {TXId} is an {STRNW} referring to a semantically related
+              set of events.
+
+            * {EVClassVer} is a {version} referring to the software version
+              of the {EVClassId}.
+
+            * {EVId} is an {STRNW} referring to the event name.
+            
+
+    (E) Identifying transactions
+
+        (a) Every transaction be uniquely identified through a {Plain-UID}
+            of the form {TXId}
+
+            where 
+                * {TXId} is an {ANSNW} referring to a transaction instance.
+
+        (b) In the case of a function invocation, the {TXId} refers to a 
+            tuple consisting of name=value pairs:
+
+            TXID={TXId}
+
+            PARENTTXID={TXId}
+                Indentifying the parent/causal transaction
+
+            ACT={request|response}
+                The activity
+
+            REQCOMPID={CompId}/{CompUID}
+                The requesting component id
+
+            RESPCOMPID={CompId}/{CompUID}
+                The responding component id
+
+            FNXID={IFId}/{IFVer}/{FNXId}
+                Identifying the function
+
+        (c) The above tuple MUST occur as a log line 
+
+            Every time a interface function invocation is made across 
+            components.
+
+        (c) In the case of a event emissions, the {TXId} refers to a 
+            tuple consisting of name=value pairs:
+
+            TXID={TXId}
+
+            PARENTTXID={TXId}
+                Indentifying the parent/causal transaction
+
+            ACT='event'
+
+            EVID={EVClassId}/{EVClassVer}/{EVId}
+                Identifying the event
+
+        (d) The above tuple MUST occur as a log line 
+
+            Every time an event is published across components.
+            
+
