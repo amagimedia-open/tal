@@ -186,6 +186,7 @@
             The only exceptions to this are
             (1) a request/event issued on a timer expiry 
             (2) a user initiated action
+            (3) those occuring in a media stream
             TODO
 
     (E) Versioning
@@ -585,6 +586,7 @@
 
 
               (rpc/rest/soap/pubsubbus/...)
+                     ENTERBREAK((actual),(metadata))
                      ENTERBREAK((params),(TXREF,PARENTTXREF))
                     ----------------------------------------->
                                                                         (log)
@@ -638,5 +640,35 @@
         for names of components, interfaces, functions and events.
 
 
+                        +-------------+
+                        | Section - V |
+                        | APPENDIX    |
+                        +-------------+
+
+    (A) Review - 1
+
+        Mon May 31 14:26:54 IST 2021
+        With Shashi and Sagar
+
+        (a) Remove function model
+
+        (b) Use event model to cover both scenarios
+            Event
+                Originator
+                Receiver 
+                Responder (when response is non-trivial
+                           respond with same tx/ptx as receiver)
+
+        (c) Vocabulary
+            https://iptc.org/standards/media-topics/
+
+        (d) Repository for vocabulary, code for log filters and visualizations
+
+        (e) HTML5 as the documentation interface
+
+            https://jalammar.github.io/
+            https://iptc.org/standards/media-topics/
+
                             -x-
+
 
