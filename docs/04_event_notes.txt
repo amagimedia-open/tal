@@ -1,9 +1,15 @@
-+------------------------------------------------------+
-| Version 0.1    01/Jun/2021          Initial version  |
-+------------------------------------------------------+
++------------+-----------------+--------------------------------+    
+| Version    |    Date         |  Comments                      |
++------------+-----------------+--------------------------------+
+| 0.1        |    01/Jun/2021  |  Initial version               |
+| 0.11       |    01/Jun/2021  |  Added sub-section on          |
+|            |                 |  'COMP carousel'               |
++------------+-----------------+--------------------------------+
 
-This document overrides the data model for transactions as specified
-in transaction-model.txt.
+                        Abstract
+                        --------
+This document overrides the data model for transactions as 
+specified in transaction-model.txt.
 
 (01) The focus is on training.
 
@@ -37,24 +43,24 @@ in transaction-model.txt.
 
 (05) The model
 
-     REQ 
-     ===
+     (a) REQ 
+     =======
 
      Comp(A) ------(req)---------> Comp(B)
          
-             req = B/fnx ((params),metadata)
+             req = (foo(params),metadata)
              where metadata = (CIE_ID, CIE_CID)
 
      CIE_ID       ----same-----    CIE_ID  -----+
      CIE_CID      ----same-----    CIE_CID      |
-     CIE_COMP                      CIE_COMP     |
+     CIE_COMP=A                    CIE_COMP=B   |
      CIE_AT                        CIE_AT       |
-     CIE_SNKC                                   |
-     CIE_REQF                                   |
-     CIE_LOC                       CIE_LOC      |   
+     CIE_SNKC=B                                 |
+     CIE_REQF=foo                               |
+     CIE_LOC=SRC                   CIE_LOC=SNK  |   
                                                 |
-     RESP (Optional)                            |
-     ===============                            |
+     (b) RESP (Optional)                        |
+     ===================                        |
                                                 |
      Comp(A) <-----(resp)---------  Comp(B)     |
                                                 |
@@ -63,21 +69,30 @@ in transaction-model.txt.
                                                 |
      CIE_ID       ----same-----    CIE_ID       |
      CIE_CID      ----same-----    CIE_CID <----+
-     CIE_COMP                      CIE_COMP
+     CIE_COMP=A                    CIE_COMP=B
      CIE_AT                        CIE_AT
-     CIE_LOC                       CIE_LOC
+     CIE_LOC=SNK                   CIE_LOC=SNK
 
-     MSG 
-     ===
+     (c) MSG 
+     =======
 
      Comp(A) ------(msg)---------> Comp(B) +
 
-             msg = (event,(params),metadata)
+             msg = (event(attributes),metadata)
              where metadata = (CIE_ID, CIE_CID)
 
      CIE_ID       ----same-----    CIE_ID 
      CIE_CID      ----same-----    CIE_CID
-     CIE_COMP                      CIE_COMP
+     CIE_COMP=A                    CIE_COMP=B
      CIE_AT                        CIE_AT
-     CIE_LOC                       CIE_LOC
+     CIE_LOC=SRC                   CIE_LOC=SNK
+
+     (d) COMP carousel
+     =================
+
+     CIE_COMP
+     CIE_COMP_DESC
+     CIE_COMP_STARTED_AT
+     CIE_COMP_STATE {startup|initialization|running|restored|shutdown}
+     CIE_COMP_VER
 
