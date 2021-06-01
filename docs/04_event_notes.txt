@@ -4,6 +4,7 @@
 | 0.1        |    01/Jun/2021  |  Initial version               |
 | 0.11       |    01/Jun/2021  |  Added sub-section on          |
 |            |                 |  'COMP carousel'               |
+| 0.12       |    01/Jun/2021  |  Added the example section     |
 +------------+-----------------+--------------------------------+
 
                         Abstract
@@ -71,7 +72,7 @@ specified in transaction-model.txt.
      CIE_CID      ----same-----    CIE_CID <----+
      CIE_COMP=A                    CIE_COMP=B
      CIE_AT                        CIE_AT
-     CIE_LOC=SNK                   CIE_LOC=SNK
+     CIE_LOC=SNK                   CIE_LOC=SRC
 
      (c) MSG 
      =======
@@ -87,12 +88,62 @@ specified in transaction-model.txt.
      CIE_AT                        CIE_AT
      CIE_LOC=SRC                   CIE_LOC=SNK
 
-     (d) COMP carousel
-     =================
+     (d) COMP information
+     ====================
+
+     This is repeated as in a carousel
 
      CIE_COMP
      CIE_COMP_DESC
      CIE_COMP_STARTED_AT
      CIE_COMP_STATE {startup|initialization|running|restored|shutdown}
      CIE_COMP_VER
+
+
+(06) An example
+
+     The PLM component makes a PLAYI function request to the PLAYER
+     component.
+
+
+      +------+                                    +--------+
+      | PLM  |                                    | PLAYER |
+      | logs |                                    | logs   |
+      +------+                                    +--------+
+
+    ===============[COMPONENT INFO IN A CAROUSEL]============================
+
+                                    CIE_COMP = COMP/CPMPLY/1622559828
+                                    CIE_COMP_DESC = Cloudport media player
+                                    CIE_COMP_STARTED_AT = 2021-06-01T11:25:03Z
+                                    CIE_COMP_STATE = running
+                                    CIE_COMP_VER = 3.5.6
+
+    CIE_COMP = COMP/PLM/1622363525
+    CIE_COMP_DESC = Cloudport playlist manager
+    CIE_COMP_STARTED_AT = 2021-06-01T11:30:43Z
+    CIE_COMP_STATE = running
+    CIE_COMP_VER = 1.5.3
+
+    ===============[PLAY IMMEDIATE REQUEST]==================================
+
+    CIE_CID  = CIE/1.0/1622560089
+    CIE_ID   = CIE/1.0/1622560116
+    CIE_COMP = COMP/PLM/1622363525
+    CIE_AT   = 2021-06-01T11:33:15Z
+    CIE_SNKC = COMP/CPMPLY/1622559828
+    CIE_REQF = FNX/CPMPLYI/-/PLAYI
+    CIE_LOC  = SRC
+
+              REQ = (PLAYI(..params..), 
+                     (CIE_ID  = CIE/1.0/1622560116,
+                      CIE_CID = CIE/1.0/1622560089))
+          ---------------------------------------------->
+
+                                    CIE_CID  = CIE/1.0/1622560089
+                                    CIE_ID   = CIE/1.0/1622560116
+                                    CIE_COMP = COMP/CPMPLY/1622559828
+                                    CIE_AT   = 2021-06-01T11:33:16Z
+                                    CIE_LOC  = SNK
+
 
