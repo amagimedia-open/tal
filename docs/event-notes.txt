@@ -1,0 +1,74 @@
++------------------------------------------------------+
+| Version 0.1    01/Jun/2021          Initial version  |
++------------------------------------------------------+
+
+This document overrides the data model for transactions as specified
+in transaction-model.txt.
+
+(01) The focus is on training.
+
+(02) We are interested with events related to component interactions 
+     (CI) only
+
+(03) A CI-Event occurs when a component interacts with another.
+
+     This can occur when
+     (a) a component places a request with another (REQ)
+     (b) a component responds to a request (RESP)
+     (c) a component publishes a message that is received by
+         one or more components (MSG)
+
+(04) A CI-Event is characterised minimally by the following fields
+
+     (a) CIE_ID   : Id for the specific CI instance.
+     (b) CIE_CID  : The causal id (causing CIE_ID to occur).
+     (c) CIE_COMP : The component logging this event.
+     (d) CIE_AT   : The date-time at which this CI was logged.
+     (e) CIE_LOC  : Whether source or sink
+
+     In a (REQ) case we have two additional fields:
+
+     (f) CIE_SNKC  : The component that is the sink for the request.
+     (g) CIE_REQF  : The functional end point of the request.
+
+     In a (RESP) case (optional)
+        assert(CIE_ID(resp)  != CIE_ID(req))
+        assert(CIE_CID(resp) == CIE_ID(req))
+
+(05) The model
+
+     REQ 
+     ===
+
+     Comp(A) ------(req)---------> Comp(B)
+
+     CIE_ID       ----same-----    CIE_ID  -----+
+     CIE_CID      ----same-----    CIE_CID      |
+     CIE_COMP                      CIE_COMP     |
+     CIE_AT                        CIE_AT       |
+     CIE_SNKC                                   |
+     CIE_REQF                                   |
+     CIE_LOC                       CIE_LOC      |   
+                                                |
+     RESP (Optional)                            |
+     ===============                            |
+                                                |
+     Comp(A) <-----(resp)---------  Comp(B)     |
+                                                |
+     CIE_ID       ----same-----    CIE_ID       |
+     CIE_CID      ----same-----    CIE_CID <----+
+     CIE_COMP                      CIE_COMP
+     CIE_AT                        CIE_AT
+     CIE_LOC                       CIE_LOC
+
+     MSG 
+     ===
+
+     Comp(A) ------(msg)---------> Comp(B) +
+
+     CIE_ID       ----same-----    CIE_ID 
+     CIE_CID      ----same-----    CIE_CID
+     CIE_COMP                      CIE_COMP
+     CIE_AT                        CIE_AT
+     CIE_LOC                       CIE_LOC
+
