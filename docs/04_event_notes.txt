@@ -41,6 +41,9 @@ in transaction-model.txt.
      ===
 
      Comp(A) ------(req)---------> Comp(B)
+         
+             req = B/fnx ((params),metadata)
+             where metadata = (CIE_ID, CIE_CID)
 
      CIE_ID       ----same-----    CIE_ID  -----+
      CIE_CID      ----same-----    CIE_CID      |
@@ -55,6 +58,9 @@ in transaction-model.txt.
                                                 |
      Comp(A) <-----(resp)---------  Comp(B)     |
                                                 |
+             resp = ((data),metadata)           |
+             where metadata = (CIE_ID, CIE_CID) |
+                                                |
      CIE_ID       ----same-----    CIE_ID       |
      CIE_CID      ----same-----    CIE_CID <----+
      CIE_COMP                      CIE_COMP
@@ -65,6 +71,9 @@ in transaction-model.txt.
      ===
 
      Comp(A) ------(msg)---------> Comp(B) +
+
+             msg = (event,(params),metadata)
+             where metadata = (CIE_ID, CIE_CID)
 
      CIE_ID       ----same-----    CIE_ID 
      CIE_CID      ----same-----    CIE_CID
