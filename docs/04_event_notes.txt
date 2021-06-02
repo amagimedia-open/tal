@@ -189,9 +189,9 @@ specified in 03_transaction_model.txt
         example:
 
         schema_name : cie_component_info
-        schema : name,version,instance,description,started_at
+        schema : NAME,VERSION,INSTANCE,DESCRIPTION,STATE,STARTED_AT
         record : PLM, 1.5.3, 1622363525, Cloudport playlist manager, \
-                 2021-06-01T11:30:43Z, running
+                 running, 2021-06-01T11:30:43Z
 
     (C) json
 
@@ -203,8 +203,8 @@ specified in 03_transaction_model.txt
                 "version" = "1.5.3"
                 "instance" = "1622363525"
                 "description" = "Cloudport playlist manager"
-                "started_at" = "2021-06-01T11:30:43Z"
                 "state" = "running"
+                "started_at" = "2021-06-01T11:30:43Z"
             }
         }
 
@@ -213,8 +213,8 @@ specified in 03_transaction_model.txt
         example:
 
         CIE/COMPINFO/PLM/1.5.3/1622363525/DESC/Cloudport&nbsp;playlist&nbsp;manager, \
-        CIE/COMPINFO/PLM/1.5.3/1622363525/STARTEDAT/2021-06-01T11:30:43Z, \
-        CIE/COMPINFO/PLM/1.5.3/1622363525/STATE/running
+        CIE/COMPINFO/PLM/1.5.3/1622363525/STATE/running, \
+        CIE/COMPINFO/PLM/1.5.3/1622363525/STARTEDAT/2021-06-01T11:30:43Z
 
                         -x-
 
