@@ -10,7 +10,7 @@
                         Abstract
                         --------
 This document overrides the data model for transactions as 
-specified in transaction-model.txt.
+specified in 03_transaction_model.txt
 
 (01) The focus is on training.
 
@@ -57,7 +57,7 @@ specified in transaction-model.txt.
      CIE_COMP=A                    CIE_COMP=B   |
      CIE_AT                        CIE_AT       |
      CIE_SNKC=B                                 |
-     CIE_REQF=foo                               |
+     CIE_REQF=foo                  CIE_REQF=foo |
      CIE_LOC=SRC                   CIE_LOC=SNK  |   
                                                 |
      (b) RESP (Optional)                        |
@@ -144,6 +144,36 @@ specified in transaction-model.txt.
                                     CIE_ID   = CIE/1.0/1622560116
                                     CIE_COMP = COMP/CPMPLY/1622559828
                                     CIE_AT   = 2021-06-01T11:33:16Z
+                                    CIE_REQF = FNX/CPMPLYI/1.1/PLAYI
                                     CIE_LOC  = SNK
 
+    ===============[ENTERBREAK OP MSG]=======================================
+
+      +------------+                              +--------+
+      | OP-CONSOLE |                              | PLM    |
+      | logs       |                              | logs   |
+      +------------+                              +--------+
+
+    CIE_CID  = CIE/1.0/-
+    CIE_ID   = CIE/1.0/1622597463
+    CIE_COMP = COMP/OPCON/1622597481
+    CIE_AT   = 2021-06-01T11:40:33Z
+    CIE_REQF = MSG/OPCONEVC/5.5/ENTERBREAK
+    CIE_LOC  = SRC
+
+              PUBLISH MSG = (ENTERBREAK(..attrs..), 
+                     (CIE_ID  = CIE/1.0/1622597463,
+                      CIE_CID = CIE/1.0/-))
+
+          >>>(publish via some event bus connector)>>>
+
+
+                                    CIE_CID  = CIE/1.0/-
+                                    CIE_ID   = CIE/1.0/1622597463
+                                    CIE_COMP = COMP/PLM/1622363525
+                                    CIE_AT   = 2021-06-01T11:40:33Z
+                                    CIE_REQF = MSG/-/-/ENTERBREAK
+                                    CIE_LOC  = SNK
+
+                        -x-
 
