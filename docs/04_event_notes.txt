@@ -5,6 +5,7 @@
 | 0.11       |    01/Jun/2021  |  Added sub-section on          |
 |            |                 |  'COMP carousel'               |
 | 0.12       |    01/Jun/2021  |  Added the example section     |
+| 0.13       |    02/Jun/2021  |  Added representation section  |
 +------------+-----------------+--------------------------------+
 
                         Abstract
@@ -100,10 +101,10 @@ specified in 03_transaction_model.txt
      CIE_COMP_VER
 
 
-(06) An example
+(06) Examples
 
-     The PLM component makes a PLAYI function request to the PLAYER
-     component.
+     (A) The PLM component makes a PLAYI function request to the PLAYER
+         component.
 
 
       +------+                                    +--------+
@@ -147,12 +148,14 @@ specified in 03_transaction_model.txt
                                     CIE_REQF = FNX/CPMPLYI/1.1/PLAYI
                                     CIE_LOC  = SNK
 
-    ===============[ENTERBREAK OP MSG]=======================================
+    (B) The OP-CONSOLE component publishes a ENTERBREAK message.
 
       +------------+                              +--------+
       | OP-CONSOLE |                              | PLM    |
       | logs       |                              | logs   |
       +------------+                              +--------+
+
+    ===============[ENTERBREAK OP MSG]=======================================
 
     CIE_CID  = CIE/1.0/-
     CIE_ID   = CIE/1.0/1622597463
@@ -174,6 +177,44 @@ specified in 03_transaction_model.txt
                                     CIE_AT   = 2021-06-01T11:40:33Z
                                     CIE_REQF = MSG/-/-/ENTERBREAK
                                     CIE_LOC  = SNK
+
+(07) Representations
+
+    (A) name=value{,name=value}*
+        see section 06.
+
+    (B) schema based (each column has a specific meaning)
+        value{,value}*
+
+        example:
+
+        schema_name : cie_component_info
+        schema : name,version,instance,description,started_at
+        record : PLM, 1.5.3, 1622363525, Cloudport playlist manager, \
+                 2021-06-01T11:30:43Z, running
+
+    (C) json
+
+        example:
+
+        {
+            "cie_component_info" : {
+                "name" = "PLM"
+                "version" = "1.5.3"
+                "instance" = "1622363525"
+                "description" = "Cloudport playlist manager"
+                "started_at" = "2021-06-01T11:30:43Z"
+                "state" = "running"
+            }
+        }
+
+    (D) urn{,urn}*
+
+        example:
+
+        CIE/COMPINFO/PLM/1.5.3/1622363525/DESC/Cloudport&nbsp;playlist&nbsp;manager, \
+        CIE/COMPINFO/PLM/1.5.3/1622363525/STARTEDAT/2021-06-01T11:30:43Z, \
+        CIE/COMPINFO/PLM/1.5.3/1622363525/STATE/running
 
                         -x-
 
