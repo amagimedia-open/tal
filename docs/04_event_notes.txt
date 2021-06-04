@@ -28,9 +28,10 @@ specified in 03_transaction_model.txt
 
 (04) A CI-Event is characterised minimally by the following fields
 
+
      (a) CIE_ID   : Id for the specific CI instance.
      (b) CIE_CID  : The causal id (causing CIE_ID to occur).
-     (c) CIE_COMP : The component logging this event.
+     (c) CIE_COMP : The component logging this interaction.
      (d) CIE_AT   : The date-time at which this CI was logged.
      (e) CIE_LOC  : Whether source or sink
 
@@ -53,8 +54,8 @@ specified in 03_transaction_model.txt
              req = (foo(params),metadata)
              where metadata = (CIE_ID, CIE_CID)
 
-     CIE_ID       ----same-----    CIE_ID  -----+
-     CIE_CID      ----same-----    CIE_CID      |
+     CIE_ID=1234  ----same-----    CIE_ID  -----+
+     CIE_CID=0045 ----same-----    CIE_CID      |
      CIE_COMP=A                    CIE_COMP=B   |
      CIE_AT                        CIE_AT       |
      CIE_SNKC=B                                 |
@@ -80,13 +81,14 @@ specified in 03_transaction_model.txt
 
      Comp(A) ------(msg)---------> Comp(B) +
 
-             msg = (event(attributes),metadata)
+             msg = (event:boo(attributes),metadata)
              where metadata = (CIE_ID, CIE_CID)
 
      CIE_ID       ----same-----    CIE_ID 
      CIE_CID      ----same-----    CIE_CID
      CIE_COMP=A                    CIE_COMP=B
      CIE_AT                        CIE_AT
+     CIE_MSG=boo                   CIE_REQF=boo
      CIE_LOC=SRC                   CIE_LOC=SNK
 
      (d) COMP information
@@ -132,8 +134,8 @@ specified in 03_transaction_model.txt
     CIE_ID   = CIE/1.0/1622560116
     CIE_COMP = COMP/PLM/1622363525
     CIE_AT   = 2021-06-01T11:33:15Z
-    CIE_SNKC = COMP/CPMPLY/1622559828
-    CIE_REQF = FNX/CPMPLYI/-/PLAYI
+    CIE_SNKC = COMP/CPMPLY/-
+    CIE_REQF = FNX/CPMPLYI/1.1/PLAYI
     CIE_LOC  = SRC
 
               REQ = (PLAYI(..params..), 
@@ -161,7 +163,7 @@ specified in 03_transaction_model.txt
     CIE_ID   = CIE/1.0/1622597463
     CIE_COMP = COMP/OPCON/1622597481
     CIE_AT   = 2021-06-01T11:40:33Z
-    CIE_REQF = MSG/OPCONEVC/5.5/ENTERBREAK
+    CIE_MSG  = MSG/OPCONEVC/5.5/ENTERBREAK
     CIE_LOC  = SRC
 
               PUBLISH MSG = (ENTERBREAK(..attrs..), 
@@ -175,10 +177,10 @@ specified in 03_transaction_model.txt
                                     CIE_ID   = CIE/1.0/1622597463
                                     CIE_COMP = COMP/PLM/1622363525
                                     CIE_AT   = 2021-06-01T11:40:33Z
-                                    CIE_REQF = MSG/-/-/ENTERBREAK
+                                    CIE_MSG  = MSG/-/-/ENTERBREAK
                                     CIE_LOC  = SNK
 
-(07) Representations
+(07) Some representations
 
     (A) name=value{,name=value}*
         see section 06.
@@ -189,8 +191,8 @@ specified in 03_transaction_model.txt
         example:
 
         schema_name : cie_component_info
-        schema : NAME,VERSION,INSTANCE,DESCRIPTION,STATE,STARTED_AT
-        record : PLM, 1.5.3, 1622363525, Cloudport playlist manager, \
+        schema : EV-VER, NAME,VERSION,INSTANCE,DESCRIPTION,STATE,STARTED_AT
+        record : 1.3, PLM, 1.5.3, 1622363525, Cloudport playlist manager, \
                  running, 2021-06-01T11:30:43Z
 
     (C) json
@@ -215,6 +217,11 @@ specified in 03_transaction_model.txt
         CIE/COMPINFO/PLM/1.5.3/1622363525/DESC/Cloudport&nbsp;playlist&nbsp;manager, \
         CIE/COMPINFO/PLM/1.5.3/1622363525/STATE/running, \
         CIE/COMPINFO/PLM/1.5.3/1622363525/STARTEDAT/2021-06-01T11:30:43Z
+
+(07) Others
+
+     (a) one or more logging interfaces
+         metering, distributed transaction, ...
 
                         -x-
 

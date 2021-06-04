@@ -1,0 +1,11 @@
+Workitems
+(a) Presentation on some project
+(b) Vocabulary definition
+(c) Data model definition
+(d) Cross correlation model (eg: L2 and L3)
+(e) Documentation references model
+(f) Extending component interfaces with metadata
+(g) Definition and documentation of an API for logging interactions
+(h) Implementation of the API
+(i) Unit tests and sample visualisations
+(j) Usage of the API in some project 

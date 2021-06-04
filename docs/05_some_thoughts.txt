@@ -1,0 +1,41 @@
+(A) logging as an interface
+
+    (a) We respect this 
+
+                                +---------------------------+
+        Component-A ------------|-> (interface) Component-B |
+                                +---------------------------+
+
+    (b) We dont respect this 
+
+                                  +---------------+                 
+        Component-X   production  |  logging      |  comsumption   Component-A
+        Component-Y  ------------>|  interface(s) | -------------> Component-B
+        Component-Z               +---------------+                Component-C
+
+
+(B) data model
+
+    (a) We respect this and pay for them !
+    
+        AWS
+        GoogleCloud
+        MicrosoftAzure
+
+    (b) We don't respect this
+
+        Clear, simple data model driven by a common vocabulary at Amagi.
+
+
+(C) standard vocabulary and interface
+
+    (a) We respect this because they are paying us
+
+        NBCU using BXF
+
+    (b) But we dont imbue it at Amagi although its a standard
+
+        Because we are heady and headstrong that we are a technology
+        company using 50 different technological elements and such
+        things are 'below our dignity'.
+
