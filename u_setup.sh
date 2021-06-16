@@ -21,6 +21,8 @@ OPT_ALL=0
 OPT_VENV=0
 OPT_JAVA=0
 OPT_SIMPY=0
+OPT_GRPC=0
+OPT_HASHIDS=0
 
 if [[ $# -gt 0 ]]
 then
@@ -28,15 +30,17 @@ then
 
     if [[ $ARGS =~ -h ]]
     then
-        echo "usage: $MODNAME [-h] [clean|venv|simpy|java|all]" >&2
+        echo "usage: $MODNAME [-h] [clean|venv|simpy|grpc|hashids|java|all]" >&2
         exit 0
     fi
 
-    [[ $ARGS =~ clean ]] && { OPT_CLEAN=1; }
-    [[ $ARGS =~ venv  ]] && { OPT_VENV=1; }
-    [[ $ARGS =~ simpy ]] && { OPT_SIMPY=1; }
-    [[ $ARGS =~ java  ]] && { OPT_JAVA=1; }
-    [[ $ARGS =~ all   ]] && { OPT_ALL=1; }
+    [[ $ARGS =~ clean ]]   && { OPT_CLEAN=1; }
+    [[ $ARGS =~ venv  ]]   && { OPT_VENV=1; }
+    [[ $ARGS =~ simpy ]]   && { OPT_SIMPY=1; }
+    [[ $ARGS =~ grpc  ]]   && { OPT_GRPC=1; }
+    [[ $ARGS =~ hashids ]] && { OPT_HASHIDS=1; }
+    [[ $ARGS =~ java  ]]   && { OPT_JAVA=1; }
+    [[ $ARGS =~ all   ]]   && { OPT_ALL=1; }
 fi
 
 #+-----------------------------+
@@ -140,6 +144,12 @@ fi
 
 source $TAL_VENV_ACTIVATE_FILE_PATH
 
+    #+-------------+
+    #| upgrade pip |
+    #+-------------+
+
+    python -m pip install --upgrade pip
+
     #+---------------+
     #| install simpy |
     #+---------------+
@@ -148,6 +158,19 @@ source $TAL_VENV_ACTIVATE_FILE_PATH
     then
         pip install -U simpy
         #pip install -U pytest
+    fi
+
+    if ((OPT_ALL || OPT_GRPC))
+    then
+        #https://grpc.io/docs/languages/python/quickstart/
+        python -m pip install grpcio
+        python -m pip install grpcio-tools
+        git clone -b v1.38.0 https://github.com/grpc/grpc
+    fi
+
+    if ((OPT_ALL || OPT_HASHIDS))
+    then
+        pip install hashids
     fi
 
 set +u
