@@ -79,7 +79,7 @@ def id_dict_2_int_list (id_dict):
           id_dict["ss_epoch"] 
         ]
     l.append(str_2_int(id_dict["comp_name"]))
-    l.append(str_2_int(id_dict["comp_csver"]))
+    l.append(int(id_dict["comp_csver"]))
     return l
 
 #----------------------------------------------------------------------------
@@ -131,7 +131,7 @@ class UnitTests():
             "gtc_ver"    : 9,           # max 1 digit
             "ss_epoch"   : 2357899999,  # Max: Mon Sep 19 17:43:19 IST 2044
             "comp_name"  : "FOO",       # max 3 characters
-            "comp_csver" : "9999FE"     # MMmmpp (Major Minor Patch) in hex !
+            "comp_csver" : "999999"     # MMmmpp (Major Minor Patch) in hex !
         }
 
     def tc_1(self):
@@ -140,10 +140,19 @@ class UnitTests():
         print(trace_id_1, len(trace_id_1), file=sys.stderr)
 
     def tc_2(self):
+        # Advantages
+        # clear encoding. can be decoded visibly.
+        #
+        # larger ss_epoch value
         # $ printf "%d\n" 0xffffffff
         # 4294967295
         # $ date --date=@4294967295
         # Sun Feb  7 11:58:15 IST 2106
+        #
+        # larger comp_csver value
+        # "FFFFFF"
+        #
+        # takes up only 21 characters. 11 more available.
 
         print(self.id_dict, file=sys.stderr)
         trace_id_2 = id_dict_2_trace_id__2 (self.id_dict)
