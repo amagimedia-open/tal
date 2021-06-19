@@ -1,0 +1,178 @@
+import datetime
+import random
+import os.path
+import uuid
+import sys
+from   hashids import Hashids
+
+g_gtc_version = "0.1.0"
+
+#----------------------------------------------------------------------------
+
+def get_counter(filepath):
+    if (filepath == None):
+        return 0
+
+    counter = 0
+
+    if (os.path.isfile(filepath)):
+        with open(filepath, "r") as f:
+            line = f.read().replace("\n", " ")
+            counter = int(line)
+
+    next_counter = counter + 1
+
+    with open(filepath, "w") as f:
+        print (f"{next_counter}", file=f)
+
+    return counter
+
+#----------------------------------------------------------------------------
+
+def get_secs_since_epoch():
+    return int((datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds())
+
+#----------------------------------------------------------------------------
+
+def get_mac_id():
+    return uuid.getnode()
+
+#----------------------------------------------------------------------------
+
+def get_random_int(seed=None):
+    if (seed != None):
+        random.seed(seed)
+    return random.randint(0,65535)
+
+#----------------------------------------------------------------------------
+
+def gen_default_id_dict (**kwargs):
+    global g_gtc_version
+
+    # kwargs must be composed of none or more of the following
+    # component_name
+    # random_seed
+    #
+    # see "Generate ids based on timestamp"
+    # https://hashids.org/python/#how-does-it-work
+
+    counter_filepath = None
+    if "counter_filepath" in kwargs:
+        counter_filepath = kwargs["counter_filepath"]
+
+    component_name = "UNKW"
+    if "component_name" in kwargs:
+        component_name = kwargs["component_name"]
+
+    random_seed = None
+    if "random_seed" in kwargs:
+        random_seed = kwargs["random_seed"]
+
+    id_dict = {
+        # "counter" : get_counter(counter_filepath),
+        # "mac_id"  : get_mac_id(),
+        # these have been commented as the hashid generated
+        # is > 16 bytes
+        # see https://www.w3.org/TR/trace-context/#trace-id
+        "ss_epoch"  : get_secs_since_epoch(),
+        "randomi16" : get_random_int(random_seed),
+        "name"      : component_name,
+        "version"   : g_gtc_version
+    }
+
+    return id_dict
+
+#----------------------------------------------------------------------------
+
+def str_2_int_list(str):
+    l = []
+    l.extend(bytearray(str.encode()))
+    return l
+
+#----------------------------------------------------------------------------
+
+def int_list_2_int(int_list):
+    s = "" 
+    for i in int_list:
+        s = s + str(i)
+    return int(s)
+
+#----------------------------------------------------------------------------
+
+def str_2_hex(s):
+    l = bytearray(s.encode())
+    s = "" 
+    for i in l:
+        s = s + str(i)
+
+    return int(s)
+
+#----------------------------------------------------------------------------
+
+def id_dict_2_int_list (id_dict):
+    l = [ 
+          #id_dict["counter"], 
+          #id_dict["mac_id"],
+          id_dict["ss_epoch"], 
+          id_dict["randomi16"] 
+        ]
+    #l.append(int_list_2_int(str_2_int_list(id_dict["name"])))
+    #l.append(int_list_2_int(str_2_int_list(id_dict["version"])))
+    l.append(str_2_hex(id_dict["name"]))
+    l.append(id_dict["version"])
+
+    #l.extend(str_2_int_list(id_dict["name"]))
+    #l.extend(str_2_int_list(id_dict["version"]))
+    return l
+
+#----------------------------------------------------------------------------
+
+def int_list_2_trace_id (int_list, salt):
+
+    h = Hashids(salt, 32, "0123456789abcdef")
+    e = h.encode(*int_list)
+    return e
+
+#-------------------------[MAIN]---------------------------------------------
+
+class UnitTests():
+
+    def tc_1(self):
+
+        id_dict = {
+            #"counter"   : sys.maxsize,
+            #"mac_id"    : 84367525827684,
+            "version"   : 1,
+            "name"      : "HELLO",
+            "ss_epoch"  : 1624028168,
+            "randomi16" : 54328
+        }
+        print(id_dict, file=sys.stderr)
+
+        int_list = id_dict_2_int_list (id_dict)
+        print(int_list, file=sys.stderr)
+
+        trace_id = int_list_2_trace_id (int_list, "com.amagi.w3c.trace_context")
+        print(trace_id, len(trace_id), file=sys.stderr)
+
+
+    def tc_2(self):
+
+        id_dict = gen_default_id_dict(counter_filepath="counter.txt")
+        print(id_dict, file=sys.stderr)
+
+        int_list = id_dict_2_int_list (id_dict)
+        print(int_list, file=sys.stderr)
+
+        trace_id = int_list_2_trace_id (int_list, "com.amagi.w3c.trace_context")
+        print(trace_id, len(trace_id), file=sys.stderr)
+
+
+if __name__ == '__main__':
+
+    ut = UnitTests()
+    ut.tc_1()
+    #print("#----", file=sys.stderr)
+    #ut.tc_2()
+
+

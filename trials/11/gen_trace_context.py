@@ -57,11 +57,12 @@ def hexencode_str(s):
 
 def id_dict_2_int_list (id_dict):
     l = [ 
-          id_dict["gtc_ver"], 
+          #id_dict["gtc_ver"], 
           id_dict["ss_epoch"] 
         ]
     l.append(str_2_int(id_dict["comp_name"]))
-    l.append(id_dict["comp_csver"])
+    #l.append(id_dict["comp_csver"])
+    #TODO: identify a trace tree uniquely
     return l
 
 #----------------------------------------------------------------------------
@@ -70,17 +71,6 @@ def int_list_2_trace_id (int_list, salt):
     h = Hashids(salt, 32, "0123456789abcdef")
     e = h.encode(*int_list)
     return e
-
-#----------------------------------------------------------------------------
-
-def id_dict_2_int_list (id_dict):
-    l = [ 
-          id_dict["gtc_ver"], 
-          id_dict["ss_epoch"] 
-        ]
-    l.append(str_2_int(id_dict["comp_name"]))
-    l.append(int(id_dict["comp_csver"]))
-    return l
 
 #----------------------------------------------------------------------------
 
@@ -129,8 +119,8 @@ class UnitTests():
     def __init__(self):
         self.id_dict = {
             "gtc_ver"    : 9,           # max 1 digit
-            "ss_epoch"   : 2357899999,  # Max: Mon Sep 19 17:43:19 IST 2044
-            "comp_name"  : "FOO",       # max 3 characters
+            "ss_epoch"   : 2357899999 * 1000,  # Max: Mon Sep 19 17:43:19 IST 2044
+            "comp_name"  : "FOOBOOZOO", # max 3 characters
             "comp_csver" : "999999"     # MMmmpp (Major Minor Patch) in hex !
         }
 
@@ -142,6 +132,9 @@ class UnitTests():
     def tc_2(self):
         # Advantages
         # clear encoding. can be decoded visibly.
+        #
+        # larger gtc_ver value
+        # f (> 9)
         #
         # larger ss_epoch value
         # $ printf "%d\n" 0xffffffff
@@ -167,3 +160,8 @@ if __name__ == '__main__':
     ut.tc_2()
 
 
+"""
+Sat Jun 19 13:45:42 IST 2021
+Sashi
+* time since epoch in milliseconds
+"""
