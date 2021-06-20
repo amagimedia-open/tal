@@ -64,7 +64,8 @@ function safe_rmdir
             then
                 echo "$MODNAME:removing contents of folder $_folder ..." >&2
                 rm -rf ./*
-                rm -f .*
+                rm -rf ./.*
+                rm -f  .*
             fi
         )
 
@@ -73,6 +74,11 @@ function safe_rmdir
     fi
 }
 
+if ((OPT_ALL))
+then
+    OPT_CLEAN=1
+fi
+
 #+---------+
 #| cleanup |
 #+---------+
@@ -80,7 +86,8 @@ function safe_rmdir
 if ((OPT_CLEAN))
 then
     safe_rmdir $TAL_VENV_FOLDER_PATH
-    exit 0
+    safe_rmdir grpc
+    ((OPT_ALL == 0)) && { exit 0; }
 fi
 
 #+----------------------------+
@@ -150,6 +157,8 @@ source $TAL_VENV_ACTIVATE_FILE_PATH
 
     python -m pip install --upgrade pip
 
+    pip install -U pytest
+
     #+---------------+
     #| install simpy |
     #+---------------+
@@ -157,8 +166,11 @@ source $TAL_VENV_ACTIVATE_FILE_PATH
     if ((OPT_ALL || OPT_SIMPY))
     then
         pip install -U simpy
-        #pip install -U pytest
     fi
+
+    #+--------------+
+    #| install grpc |
+    #+--------------+
 
     if ((OPT_ALL || OPT_GRPC))
     then
@@ -167,6 +179,10 @@ source $TAL_VENV_ACTIVATE_FILE_PATH
         python -m pip install grpcio-tools
         git clone -b v1.38.0 https://github.com/grpc/grpc
     fi
+
+    #+-----------------+
+    #| install hashids |
+    #+-----------------+
 
     if ((OPT_ALL || OPT_HASHIDS))
     then

@@ -8,6 +8,28 @@ import sys
 
 #----------------------------------------------------------------------------
 
+def is_hex_string(s, expected_len=0, non_zero_value=True):
+
+    if (expected_len > 0):
+        actual_len = len(s)
+        if (actual_len != expected_len):
+            print(f"s={s},exp_len={expected_len},actual_len={l}", file=sys.stderr)
+            return False
+
+    try:
+        val = int(f"0x{s}", 16)
+        if (non_zero_value and val == 0):
+            print(f"s={s},zero valued", file=sys.stderr)
+            return False
+    except ValueError:
+        print(f"s={s},not in hex", file=sys.stderr)
+        return False
+
+    return True
+
+
+#----------------------------------------------------------------------------
+
 class W3CTC00TraceIdGenerator():
     """
     Default implementation for
@@ -47,6 +69,14 @@ class W3CTC00ParentIdGenerator():
 
 class W3CTC00Traceparent():
 
+    S_OK = 0
+    S_INVALID_LEN         = 1
+    S_NUM_FIELDS_MISMATCH = 2
+    S_INVALID_VERSION     = 3
+    S_INVALID_TRACE_ID    = 4
+    S_INVALID_PARENT_ID   = 5
+    S_INVALID_TRACE_FLAG  = 6
+
     def __init__(self, trace_id_str, parent_id_str, trace_flags_str):
         self.m_version_str     = "00"
         self.m_trace_id_str    = trace_id_str
@@ -78,54 +108,55 @@ class W3CTC00Traceparent():
         return self.m_trace_flags_str
 
     @staticmethod
-    def parse (tc00_str):
+    def parse (tc00tp_str):
         """
         Returns a 3-tuple
-        (parse_status, parse_error_str, W3CTC00Traceparent)
+        (parse_status, W3CTC00Traceparent)
+        see https://www.w3.org/TR/trace-context/#versioning-of-traceparent
         """
 
         while True: # just need a 'block'
 
-            fields = tc00_str.split("-")
+            if (len(tc00tp_str) != 55):
+                ret = (W3CTC00Traceparent.S_INVALID_LEN, None)
+                break
+
+            fields = tc00tp_str.split("-")
             n = len(fields)
             if (n != 4):
-                error_str =  "w3c/tc/00/tp num. fields mismatch. " +\
-                            f"found {n}. expected 4."
-                ret = (False, error_str, None)
+                ret = (W3CTC00Traceparent.S_NUM_FIELDS_MISMATCH, None)
                 break
 
             version_str = fields[0]
             if (version_str != "00"): 
-                error_str =  "w3c/tc/00/tp 'version' mismatch. " +\
-                            f"found {version_str}. expected 00."
-                ret = (False, error_str, None)
+                ret = (W3CTC00Traceparent.S_INVALID_VERSION, None)
                 break
 
             trace_id_str = fields[1]
-            if (trace_id_str == "0" * 32): 
-                error_str = "w3c/tc/00/tp invalid 'trace id' value of all 0's."
-                ret = (False, error_str, None)
+            if (not is_hex_string(trace_id_str, 32)):
+                ret = (W3CTC00Traceparent.S_INVALID_TRACE_ID, None)
                 break
 
             parent_id_str = fields[2]
-            if (parent_id_str == "0" * 32): 
-                error_str = "w3c/tc/00/tp invalid 'parent id' value of all 0's."
-                ret = (False, error_str, None)
+            if (not is_hex_string(parent_id_str, 16)):
+                ret = (W3CTC00Traceparent.S_INVALID_PARENT_ID, None)
                 break
 
             trace_flags_str = fields[3]
+            if (not is_hex_string(trace_flags_str, 2)):
+                ret = (W3CTC00Traceparent.S_INVALID_TRACE_FLAG, None)
+                break
             if (not (trace_flags_str == "00" or 
                      trace_flags_str == "01")):
                 # SAMPLED_FLAG
-                error_str = "w3c/tc/00/tp invalid 'trace flag' value."
-                ret = (False, error_str, None)
+                ret = (W3CTC00Traceparent.S_INVALID_TRACE_FLAG, None)
                 break
 
             traceparent = W3CTC00Traceparent(
                             trace_id_str,
                             parent_id_str,
                             trace_flags_str)
-            ret = (True, "", traceparent)
+            ret = (W3CTC00Traceparent.S_OK, traceparent)
             break
 
         return ret
@@ -176,13 +207,11 @@ class W3CTC00TraceparentForward():
     """
     Default implementation for
     https://www.w3.org/TR/trace-context version 00
-    TODO: use incoming trace context
-          bad incoming trace context
     """
 
     def __init__(self, tcp, **kwargs):
         """
-        tcp => Non erroneous W3CTC00TraceparentParser
+        tcp => Non erroneous W3CTC00Traceparent
         """
 
         # kwargs parameter names
@@ -217,16 +246,16 @@ class UnitTests():
 
     def root_n_forward(self, context, tp_r):
 
-        # at client
+        # at client (generation of root)
 
         tp_r = tp_r.generate()
         print(f"{context}: client >>> {tp_r} >>> server", file=sys.stderr)
 
-        # at server
+        # at server (generation of forward)
 
-        (status, error_str, tp_p) = W3CTC00Traceparent.parse(str(tp_r))
-        if (not status):
-            print (error_str, file=sys.stderr)
+        (status, tp_p) = W3CTC00Traceparent.parse(str(tp_r))
+        if (status != W3CTC00Traceparent.S_OK):
+            print (f"status_code={status}", file=sys.stderr)
             return
 
         tp_f = W3CTC00TraceparentForward(tp_p).generate()
