@@ -15,7 +15,7 @@ class W3CTC00TraceIdGenerator():
     def __init__(self):
         return
 
-    def generate(self):
+    def generate32(self):
         return uuid.uuid4().hex
 
 #----------------------------------------------------------------------------
@@ -29,7 +29,7 @@ class W3CTC00ParentIdGenerator():
     def __init__(self):
         return
 
-    def generate(self):
+    def generate16(self):
 
         rand_32 = random.randint(0, 0xffffffff)
         s_r32   = hex(rand_32)[2:].zfill(8)
@@ -163,7 +163,7 @@ class W3CTC00TraceparentRoot():
         else:
             self.parent_id_gen = W3CTC00ParentIdGenerator()
 
-        self.trace_id = self.trace_id_gen.generate()
+        self.trace_id = self.trace_id_gen.generate32()
 
         return
 
@@ -174,7 +174,7 @@ class W3CTC00TraceparentRoot():
 
         return W3CTC00Traceparent(
                 self.trace_id,
-                self.parent_id_gen.generate(),
+                self.parent_id_gen.generate16(),
                 "01" if (sampled_flag) else "00")
         
 #----------------------------------------------------------------------------
@@ -210,6 +210,6 @@ class W3CTC00TraceparentForward():
 
         return W3CTC00Traceparent(
                 self.tcp.trace_id_str,
-                self.parent_id_gen.generate(),
+                self.parent_id_gen.generate16(),
                 "01" if (sampled_flag) else self.tcp.trace_flags_str)
 
