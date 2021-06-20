@@ -220,7 +220,7 @@ class UnitTests():
         # at client
 
         tp_r = tp_r.generate()
-        print(f"{context} >>> {tp_r}", file=sys.stderr)
+        print(f"{context}: client >>> {tp_r} >>> server", file=sys.stderr)
 
         # at server
 
@@ -230,7 +230,7 @@ class UnitTests():
             return
 
         tp_f = W3CTC00TraceparentForward(tp_p).generate()
-        print(f"{context} <<< {tp_f}", file=sys.stderr)
+        print(f"{context}: client <<< {tp_f} <<< server", file=sys.stderr)
 
         print()
 
