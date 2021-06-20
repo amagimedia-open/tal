@@ -8,7 +8,7 @@ DIRNAME=$(readlink -e $(dirname $0))
 source $TAL_VENV_ACTIVATE_FILE_PATH
 cd $DIRNAME
 
-python trace_context.py
+python w3c_tc00_ut.py
 
 set +u
 deactivate

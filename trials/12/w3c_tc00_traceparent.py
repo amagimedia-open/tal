@@ -2,31 +2,7 @@ import datetime
 import random
 import uuid
 import sys
-
-# https://en.wikipedia.org/wiki/Universally_unique_identifier
-# https://datatracker.ietf.org/doc/html/rfc4122.html
-
-#----------------------------------------------------------------------------
-
-def is_hex_string(s, expected_len=0, non_zero_value=True):
-
-    if (expected_len > 0):
-        actual_len = len(s)
-        if (actual_len != expected_len):
-            print(f"s={s},exp_len={expected_len},actual_len={l}", file=sys.stderr)
-            return False
-
-    try:
-        val = int(f"0x{s}", 16)
-        if (non_zero_value and val == 0):
-            print(f"s={s},zero valued", file=sys.stderr)
-            return False
-    except ValueError:
-        print(f"s={s},not in hex", file=sys.stderr)
-        return False
-
-    return True
-
+import w3c_tc00_utils as U
 
 #----------------------------------------------------------------------------
 
@@ -133,17 +109,17 @@ class W3CTC00Traceparent():
                 break
 
             trace_id_str = fields[1]
-            if (not is_hex_string(trace_id_str, 32)):
+            if (not U.is_hex_string(trace_id_str, 32)):
                 ret = (W3CTC00Traceparent.S_INVALID_TRACE_ID, None)
                 break
 
             parent_id_str = fields[2]
-            if (not is_hex_string(parent_id_str, 16)):
+            if (not U.is_hex_string(parent_id_str, 16)):
                 ret = (W3CTC00Traceparent.S_INVALID_PARENT_ID, None)
                 break
 
             trace_flags_str = fields[3]
-            if (not is_hex_string(trace_flags_str, 2)):
+            if (not U.is_hex_string(trace_flags_str, 2)):
                 ret = (W3CTC00Traceparent.S_INVALID_TRACE_FLAG, None)
                 break
             if (not (trace_flags_str == "00" or 
@@ -236,48 +212,4 @@ class W3CTC00TraceparentForward():
                 self.tcp.trace_id_str,
                 self.parent_id_gen.generate(),
                 "01" if (sampled_flag) else self.tcp.trace_flags_str)
-
-#----------------------------------------------------------------------------
-
-class UnitTests():
-
-    def __init__(self):
-        return
-
-    def root_n_forward(self, context, tp_r):
-
-        # at client (generation of root)
-
-        tp_r = tp_r.generate()
-        print(f"{context}: client >>> {tp_r} >>> server", file=sys.stderr)
-
-        # at server (generation of forward)
-
-        (status, tp_p) = W3CTC00Traceparent.parse(str(tp_r))
-        if (status != W3CTC00Traceparent.S_OK):
-            print (f"status_code={status}", file=sys.stderr)
-            return
-
-        tp_f = W3CTC00TraceparentForward(tp_p).generate()
-        print(f"{context}: client <<< {tp_f} <<< server", file=sys.stderr)
-
-        print()
-
-    def tc_1(self):
-        tp_r_1 = W3CTC00TraceparentRoot()
-        self.root_n_forward("r-1-tx-1", tp_r_1)
-        self.root_n_forward("r-1-tx-2", tp_r_1)
-
-        tp_r_2 = W3CTC00TraceparentRoot()
-        self.root_n_forward("r-2-tx-1", tp_r_2)
-        self.root_n_forward("r-2-tx-2", tp_r_2)
-
-
-if __name__ == '__main__':
-
-    ut = UnitTests()
-    ut.tc_1()
-
-
-    
 
