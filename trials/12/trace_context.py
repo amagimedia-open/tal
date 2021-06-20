@@ -132,7 +132,7 @@ class W3CTC00Traceparent():
 
 #----------------------------------------------------------------------------
 
-class W3CTC00TraceparentCreator():
+class W3CTC00TraceparentRoot():
     """
     Default implementation for
     https://www.w3.org/TR/trace-context version 00
@@ -172,7 +172,7 @@ class W3CTC00TraceparentCreator():
         
 #----------------------------------------------------------------------------
 
-class W3CTC00TraceparentForwarder():
+class W3CTC00TraceparentForward():
     """
     Default implementation for
     https://www.w3.org/TR/trace-context version 00
@@ -215,25 +215,33 @@ class UnitTests():
     def __init__(self):
         return
 
-    def generate_and_forward(self, tp_c):
+    def root_n_forward(self, context, tp_r):
 
-        tp_0 = tp_c.generate()
-        print(tp_0, file=sys.stderr)
+        # at client
 
-        (status, error_str, tp_p_0) = W3CTC00Traceparent.parse(str(tp_0))
+        tp_r = tp_r.generate()
+        print(f"{context} >>> {tp_r}", file=sys.stderr)
+
+        # at server
+
+        (status, error_str, tp_p) = W3CTC00Traceparent.parse(str(tp_r))
         if (not status):
             print (error_str, file=sys.stderr)
-        else:
-            tp_f_0 = W3CTC00TraceparentForwarder(tp_p_0)
-            tp_00 = tp_f_0.generate()
-            print(tp_00, file=sys.stderr)
+            return
+
+        tp_f = W3CTC00TraceparentForward(tp_p).generate()
+        print(f"{context} <<< {tp_f}", file=sys.stderr)
+
+        print()
 
     def tc_1(self):
-        tp_c = W3CTC00TraceparentCreator()
-        print("#---[gnf]---")
-        self.generate_and_forward(tp_c)
-        print("#---[gnf]---")
-        self.generate_and_forward(tp_c)
+        tp_r_1 = W3CTC00TraceparentRoot()
+        self.root_n_forward("r-1-tx-1", tp_r_1)
+        self.root_n_forward("r-1-tx-2", tp_r_1)
+
+        tp_r_2 = W3CTC00TraceparentRoot()
+        self.root_n_forward("r-2-tx-1", tp_r_2)
+        self.root_n_forward("r-2-tx-2", tp_r_2)
 
 
 if __name__ == '__main__':
