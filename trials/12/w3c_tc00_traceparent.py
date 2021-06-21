@@ -6,30 +6,27 @@ import w3c_tc00_utils as U
 
 #----------------------------------------------------------------------------
 
-class W3CTC00TraceIdGenerator():
-    """
-    Default implementation for
-    https://www.w3.org/TR/trace-context/#trace-id
-    """
+class DefaultUUIDGenerator():
 
     def __init__(self):
         return
 
     def generate32(self):
+        """
+        Default implementation for
+        https://www.w3.org/TR/trace-context/#trace-id
+        """
+
         return uuid.uuid4().hex
 
-#----------------------------------------------------------------------------
-
-class W3CTC00ParentIdGenerator():
-    """
-    Default implementation for
-    https://www.w3.org/TR/trace-context/#parent-id
-    """
-
-    def __init__(self):
-        return
-
     def generate16(self):
+        """
+        Default implementation for
+        https://www.w3.org/TR/trace-context/#parent-id
+
+        <---random----><---seconds-since-epoch--->
+        <---8 hex-----><---8 hex----------------->
+        """
 
         rand_32 = random.randint(0, 0xffffffff)
         s_r32   = hex(rand_32)[2:].zfill(8)
@@ -40,6 +37,7 @@ class W3CTC00ParentIdGenerator():
         s_sse = hex(seconds_since_epoch)[2:].zfill(8)
 
         return f"{s_r32}{s_sse}"
+
 
 #----------------------------------------------------------------------------
 
@@ -147,23 +145,14 @@ class W3CTC00TraceparentRoot():
           bad incoming trace context
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, uuid_gen=None):
 
-        # kwargs parameter names
-        # trace_id_gen
-        # parent_id_gen
-
-        if "trace_id_gen" in kwargs:
-            self.trace_id_gen = kwargs["trace_id_gen"]
+        if (uuid_gen != None):
+            self.uuid_gen = uuid_gen
         else:
-            self.trace_id_gen = W3CTC00TraceIdGenerator()
+            self.uuid_gen = DefaultUUIDGenerator()
 
-        if "parent_id_gen" in kwargs:
-            self.parent_id_gen = kwargs["parent_id_gen"]
-        else:
-            self.parent_id_gen = W3CTC00ParentIdGenerator()
-
-        self.trace_id = self.trace_id_gen.generate32()
+        self.trace_id = self.uuid_gen.generate32()
 
         return
 
@@ -174,42 +163,38 @@ class W3CTC00TraceparentRoot():
 
         return W3CTC00Traceparent(
                 self.trace_id,
-                self.parent_id_gen.generate16(),
+                self.uuid_gen.generate16(),
                 "01" if (sampled_flag) else "00")
         
 #----------------------------------------------------------------------------
 
-class W3CTC00TraceparentForward():
+class W3CTC00TraceparentModf():
     """
     Default implementation for
     https://www.w3.org/TR/trace-context version 00
     """
 
-    def __init__(self, tcp, **kwargs):
+    def __init__(self, traceparent, uuid_gen=None):
         """
-        tcp => Non erroneous W3CTC00Traceparent
+        traceparent => Non erroneous W3CTC00Traceparent
         """
 
-        # kwargs parameter names
-        # parent_id_gen
-
-        if "parent_id_gen" in kwargs:
-            self.parent_id_gen = kwargs["parent_id_gen"]
+        if (uuid_gen != None):
+            self.uuid_gen = uuid_gen
         else:
-            self.parent_id_gen = W3CTC00ParentIdGenerator()
+            self.uuid_gen = DefaultUUIDGenerator()
 
-        self.tcp = tcp
+        self.tcp = traceparent
 
         return
 
     def generate(self, sampled_flag=True):
-
         """
         returns an W3CTC00Traceparent instance
         """
 
         return W3CTC00Traceparent(
                 self.tcp.trace_id_str,
-                self.parent_id_gen.generate16(),
+                self.uuid_gen.generate16(),
                 "01" if (sampled_flag) else self.tcp.trace_flags_str)
 

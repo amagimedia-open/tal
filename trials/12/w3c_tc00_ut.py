@@ -3,7 +3,7 @@ import w3c_tc00_traceparent as TP
 
 #----------------------------------------------------------------------------
 
-class W3CTC00NaiveIdGenerator():
+class W3CTC00NaiveUUIDGenerator():
 
     def __init__(self):
         # https://en.wikipedia.org/wiki/Hexspeak
@@ -30,12 +30,12 @@ class UnitTests():
     def __init__(self):
         return
 
-    def root_n_forward(self, context, tp_r):
+    def root_n_forward(self, tp_r, context, source, dest):
 
         # at client (generation of root)
 
         tp_r = tp_r.generate()
-        print(f"{context}: client >>> {tp_r} >>> server", file=sys.stderr)
+        print(f"{context}: {source} >>> {tp_r} >>> {dest}", file=sys.stderr)
 
         # at server (generation of forward)
 
@@ -44,24 +44,21 @@ class UnitTests():
             print (f"status_code={status}", file=sys.stderr)
             return
 
-        tp_f = TP.W3CTC00TraceparentForward(tp_p).generate()
-        print(f"{context}: client <<< {tp_f} <<< server", file=sys.stderr)
+        tp_f = TP.W3CTC00TraceparentModf(tp_p).generate()
+        print(f"{context}: {source} <<< {tp_f} <<< {dest}", file=sys.stderr)
 
-        print()
 
     def tc_1(self):
 
         tp_r_1 = TP.W3CTC00TraceparentRoot()
-        self.root_n_forward("r-1-tx-1", tp_r_1)
-        self.root_n_forward("r-1-tx-2", tp_r_1)
+        self.root_n_forward(tp_r_1, "r-1-tx-1", "comp-A", "comp-X")
+        self.root_n_forward(tp_r_1, "r-1-tx-2", "comp-A", "comp-Y")
 
-        n_id_gen = W3CTC00NaiveIdGenerator()
+        print()
 
-        tp_r_2 = TP.W3CTC00TraceparentRoot(
-                    trace_id_gen=n_id_gen, 
-                    parent_id_gen=n_id_gen)
-        self.root_n_forward("r-2-tx-1", tp_r_2)
-        self.root_n_forward("r-2-tx-2", tp_r_2)
+        tp_r_2 = TP.W3CTC00TraceparentRoot(W3CTC00NaiveUUIDGenerator())
+        self.root_n_forward(tp_r_2, "r-2-tx-1", "comp-A", "comp-X")
+        self.root_n_forward(tp_r_2, "r-2-tx-2", "comp-A", "comp-Y")
 
 
 if __name__ == '__main__':
