@@ -1,6 +1,7 @@
-
-                    Service usage made easy
-                    =======================
+                
+                    Need for an interfaces to
+                    Amagi broadcast services
+                    =========================
 
         +---------+---------------+-----------------------------------+
         |Version  |  Date         |  Comment                          |
@@ -16,21 +17,22 @@ A. Desirable properties
     * Usability
 
     Simplicity via command line 
-        * to exercise service functionality
-        * hides implementation complexities
+        * to provide an incisive way to exercise a service
             * internally by teams
             * externally by clients
+        * to hide implementation complexities
+        * time tested way
 
     Clarity via data model 
-        * exposes syntactic and semantic vocabulary of services
-        * standard format (xml/json/yaml)
-        * easy parsing through existing tools
+        * to expose syntactic and semantic vocabulary of services
+        * in standard formats (xml/json/yaml)
+        * with easy parsing through available tools
 
     Usability through command line
-        * Driven by the edge users and not by dev.
+        * to be driven by the edge users and NOT by development
         * Users
-            * externally by clients
-            * internally by teams at amagi
+            * external clients
+            * internal teams at amagi
                 * qualification
                 * onboarding
                     * staging
@@ -39,9 +41,12 @@ A. Desirable properties
                     * trouble shooting
                     * upgrades
                 * GUI interfaces
-                * customization (through scripts)
+                * customization 
 
 B. Requirements
+
+    The command line with associated data model and vocabulary
+    must address the following:
 
     * lifecycle related
         * startup
@@ -76,24 +81,30 @@ B. Requirements
 
 C. Process
 
+    Suggested workflow elements:
+
     * model
-        * use cases -> verbs
-        * verbs -> data model and vocabulary
-    * stages
+        * state use cases 
+        * convert use cases to verbs
+        * annotate verbs with data model and vocabulary
+    * documentation stages
         * proposed
         * draft
         * adopted
         * enhanced
-    * reviews
+    * documentation reviews
         * focussed
         * formal and crisp
         * history (comments archive)
-    * adherence
-        * maintainer
+    * personnel ensuring adherence
+        * maintainer of this repository
         * auditor
+        * dev. team leads
+        * product manager
     * feedback
         * internal
         * external
 
                                 -x-
+
 
