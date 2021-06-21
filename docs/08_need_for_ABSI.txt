@@ -1,5 +1,5 @@
                 
-                    Need for an interfaces to
+                    Need for an interface to
                     Amagi broadcast services
                     =========================
 
@@ -108,3 +108,11 @@ C. Process
                                 -x-
 
 
+
+Dear @baskar, @sAgar and @shashi,
+Here is the first version of the 'Need for interface to Amagi broadcast services' document.
+The document is terse as the topic has been discussed at lengths years-on-end.
+This document was written after a meeting with shashi yesterday evening.
+Will review this again with shashi on Thursday the 24th of June 2021.
+We can then have a formal presentation by Shashi to all stakeholders (Baskar, Sagar, George, Vinod, ....).
+After acceptance and formal sign-off by all, we can start our discussion with Veeresh. (Shashi feels that this can be done earlier too. Will talk to him tomorrow on that).
