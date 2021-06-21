@@ -1,0 +1,20 @@
+Fri Jun 11 16:18:19 IST 2021
+
+(1) VAST
+(2) transcoder (rpc) rule engine
+(3) playlist builder (rpc) rule engine
+(4) Cluster head (rpc) ?
+(5) Beacon handler (async req fire and forget)
+
+lack of vocabulary
+    * which user what mapping
+    * existing user/new user
+    * segment (HLS or BXF) ?
+    * token 
+    * CMF data model and vocabulary
+      (protobuf/json/xml)
+    * trackers, beacon
+
+Lamport 
+    * design validation on table
+    * functional model

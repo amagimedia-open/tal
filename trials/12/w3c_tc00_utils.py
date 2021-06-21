@@ -26,17 +26,20 @@ def is_hex_string(s, expected_len=0, non_zero_value=True):
 
 #----------------------------------------------------------------------------
 
+def remove_whitespaces(s):
+    return "".join(s.split())
+
+#----------------------------------------------------------------------------
+
 def csnv_2_odict(s):
 
-    s = "".join(s.split())
+    s = remove_whitespaces(s).rstrip(',')
     return OrderedDict((map(lambda x: x.split('='), s.split(','))))
 
 #----------------------------------------------------------------------------
 
 def dict_2_csnv(d):
-
     return ",".join([ f"{k}={d[k]}" for k in d ])
-
 
 #----------------------------------------------------------------------------
 
@@ -47,7 +50,9 @@ class UnitTests():
 
     def tc_1(self):
 
-        s = "a = 100 , b=200, c = 300"
+        s = "a = 100 , b=200, c = 300,"
+        print(s, file=sys.stderr)
+
         od = csnv_2_odict(s)
         print(od, file=sys.stderr)
 

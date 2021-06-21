@@ -1,0 +1,99 @@
+
+                    Service usage made easy
+                    =======================
+
+        +---------+---------------+-----------------------------------+
+        |Version  |  Date         |  Comment                          |
+        +---------+---------------+-----------------------------------+
+        |0.1      |  22/jun/2021  |  Initial draft                    |
+        |         |               |  after discussion with Shashi     |
+        +---------+---------------+-----------------------------------+
+
+A. Desirable properties
+
+    * Simplicity
+    * Clarity
+    * Usability
+
+    Simplicity via command line 
+        * to exercise service functionality
+        * hides implementation complexities
+            * internally by teams
+            * externally by clients
+
+    Clarity via data model 
+        * exposes syntactic and semantic vocabulary of services
+        * standard format (xml/json/yaml)
+        * easy parsing through existing tools
+
+    Usability through command line
+        * Driven by the edge users and not by dev.
+        * Users
+            * externally by clients
+            * internally by teams at amagi
+                * qualification
+                * onboarding
+                    * staging
+                * operations
+                    * monitoring
+                    * trouble shooting
+                    * upgrades
+                * GUI interfaces
+                * customization (through scripts)
+
+B. Requirements
+
+    * lifecycle related
+        * startup
+        * provisioning/configuration
+        * restart
+        * shutdown
+
+    * service and component information related
+        * version
+        * active resource summary
+        * documentation links
+
+    * deployment readiness related
+        * version checks
+        * configuration checks
+        * component self tests
+
+    * telemetry related
+        * logs
+            * structure and semantics
+        * metrics
+        * distributed traces
+
+    * functionality related
+
+    * meta related
+        * standard command line syntax/semantics across services
+        * secure access
+
+    * allied tools documentation
+
+
+C. Process
+
+    * model
+        * use cases -> verbs
+        * verbs -> data model and vocabulary
+    * stages
+        * proposed
+        * draft
+        * adopted
+        * enhanced
+    * reviews
+        * focussed
+        * formal and crisp
+        * history (comments archive)
+    * adherence
+        * maintainer
+        * auditor
+    * feedback
+        * internal
+        * external
+
+                                -x-
+
