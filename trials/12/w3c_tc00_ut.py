@@ -54,7 +54,7 @@ class UnitTests():
         self.root_n_forward(tp_r_1, "r-1-tx-1", "comp-A", "comp-X")
         self.root_n_forward(tp_r_1, "r-1-tx-2", "comp-A", "comp-Y")
 
-        print()
+    def tc_2(self):
 
         tp_r_2 = TP.W3CTC00TraceparentRoot(W3CTC00NaiveUUIDGenerator())
         self.root_n_forward(tp_r_2, "r-2-tx-1", "comp-A", "comp-X")
@@ -65,4 +65,6 @@ if __name__ == '__main__':
 
     ut = UnitTests()
     ut.tc_1()
+    print()
+    ut.tc_2()
 
