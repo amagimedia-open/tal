@@ -25,6 +25,8 @@ A. Desirable properties
 
     Clarity via data model 
         * to expose syntactic and semantic vocabulary of services
+        * standard error data model and vocabulary
+            * motivated/derived/based on HTTP codes
         * in standard formats (xml/json/yaml)
         * with easy parsing through available tools
 
@@ -71,6 +73,8 @@ B. Requirements
         * distributed traces
 
     * functionality related
+
+    * error data model and vocabulary
 
     * meta related
         * standard command line syntax/semantics across services
