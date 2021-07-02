@@ -1,0 +1,34 @@
+A. Metrics and Measurement
+==========================
+
+A software metric is a standard of measure of a degree to which a software system or process possesses some property.[1][2] Even if a metric is not a measurement (metrics are functions, while measurements are the numbers obtained by the application of metrics), often the two terms are used as synonyms. 
+
+https://en.wikipedia.org/wiki/Software_metric#:~:text=A%20software%20metric%20is%20a,terms%20are%20used%20as%20synonyms.
+
+
+B. Metrics IS the system
+========================
+
+Now let us consider
+    * a system
+    * and properties about the system
+
+We infer that 
+    * A system is described using properties.
+    * The system is different from its properties.
+
+But without properties what is the system ?
+
+An anology will help here:
+    We can never know world. We only know it through conceptual words 
+    (that we have invented). Therefore for all practical purposes 'word' 
+    is the 'world'. If this is not the case then how can this world be
+    described ? Any description surely is made up of words.
+
+Properties or metrics describe a system. In fact the system is set of 
+functions whose domain and range must be metrics.
+
+Metric is not a measurement (metrics are functions, while measurements 
+are the numbers obtained by the application of metrics). see section A.
+
+
